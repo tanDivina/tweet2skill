@@ -1,0 +1,9 @@
+{
+  "name": "com.antigravity.linker",
+  "description": "Bridge Chrome to Antigravity Skill Python Script",
+  "path": "/Users/dorienvandenabbeele/TweetSkill/save_skill.sh",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://kdijbnmfljoifedndcagaamahhmnbphj/"
+  ]
+}
