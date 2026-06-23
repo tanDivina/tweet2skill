@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tweet2Skill",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Convert X/Twitter tweets, threads, or web pages into Antigravity skills or Claude Code rules instantly.",
   "permissions": [
     "activeTab",
@@ -9,11 +9,14 @@
     "nativeMessaging",
     "storage",
     "tabs",
-    "downloads"
+    "downloads",
+    "identity"
   ],
   "host_permissions": [
     "https://x.com/*",
-    "https://twitter.com/*"
+    "https://twitter.com/*",
+    "https://tweet2skill.hero-apps.com/*",
+    "https://accounts.google.com/*"
   ],
   "icons": {
     "16": "icons/icon-16.png",

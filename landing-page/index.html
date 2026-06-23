@@ -25,9 +25,9 @@
       </div>
       <div class="nav-links">
         <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
         <a href="#setup">Setup</a>
         <a href="#faq">FAQ</a>
-        <a href="https://github.com/tanDivina/TweetSkill" class="nav-btn" id="btn-github-nav">GitHub</a>
       </div>
     </nav>
 
@@ -36,12 +36,12 @@
       <div class="tagline">EXTRACT WEB // BUILD SKILLS // EMPOWER AGENTS</div>
       <h1 class="hero-title">Turn Web Content into AI Agent Skills Instantly</h1>
       <p class="hero-subtitle">
-        A lightweight, professional browser utility that parses X posts, threads, and documentation into perfectly structured Custom Skills for Google Antigravity and Rules for Claude Code.
+        A lightweight, professional browser utility that parses X posts, threads, and documentation into perfectly structured instructions for <strong>Antigravity</strong>, <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, and <strong>GitHub Copilot</strong>.
       </p>
       
       <div class="hero-actions">
-        <a href="#setup" class="primary-btn" id="btn-hero-get-started">Get Started</a>
-        <a href="https://github.com/tanDivina/TweetSkill" class="secondary-btn" id="btn-hero-source">View Source</a>
+        <a href="#setup" class="primary-btn" id="btn-hero-get-started">Get Started Free</a>
+        <a href="#pricing" class="secondary-btn" id="btn-hero-pricing">See Pricing</a>
       </div>
 
       <!-- Animated UI Showcase -->
@@ -108,8 +108,8 @@ description: Triggers when the user needs a 3D model.
         </div>
         <div class="feature-card">
           <div class="feature-icon">🪐</div>
-          <h3>Multi-System Support</h3>
-          <p>Toggle between **Google Antigravity Custom Skills** (YAML frontmatter structure) and **Claude Code Rules** (`CLAUDE.md` rule format).</p>
+          <h3>5 Agent Systems</h3>
+          <p>Export to <strong>Google Antigravity</strong>, <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, and <strong>GitHub Copilot</strong> — each in their native format.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">☁️</div>
@@ -120,6 +120,71 @@ description: Triggers when the user needs a 3D model.
           <div class="feature-icon">🔒</div>
           <h3>Privacy First</h3>
           <p>Your Gemini API keys are stored securely inside your local browser storage. No credentials ever touch third-party servers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing-section">
+      <h2 class="section-title">Simple, Transparent Pricing</h2>
+      <p class="section-subtitle">Start free. Upgrade when you need more power.</p>
+      <div class="pricing-grid">
+        <!-- Free Tier -->
+        <div class="pricing-card">
+          <div class="pricing-tier">Free</div>
+          <div class="pricing-price">
+            <span class="price-amount">$0</span>
+            <span class="price-period">forever</span>
+          </div>
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> 10 skills per day</li>
+            <li><span class="check">✓</span> Antigravity + Claude Code</li>
+            <li><span class="check">✓</span> Local + Cloud modes</li>
+            <li><span class="check">✓</span> Smart DOM extraction</li>
+            <li class="disabled"><span class="x-mark">✕</span> Cursor, Windsurf, Copilot</li>
+            <li class="disabled"><span class="x-mark">✕</span> Custom prompt templates</li>
+            <li class="disabled"><span class="x-mark">✕</span> Batch generation</li>
+          </ul>
+          <a href="#setup" class="pricing-btn" id="btn-pricing-free">Get Started</a>
+        </div>
+
+        <!-- BYOK Tier -->
+        <div class="pricing-card">
+          <div class="pricing-tier">Bring Your Own Key</div>
+          <div class="pricing-price">
+            <span class="price-amount">$0</span>
+            <span class="price-period">your API costs</span>
+          </div>
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> Unlimited skills</li>
+            <li><span class="check">✓</span> Antigravity + Claude Code</li>
+            <li><span class="check">✓</span> Local + Cloud modes</li>
+            <li><span class="check">✓</span> Smart DOM extraction</li>
+            <li><span class="check">✓</span> Use your own Gemini key</li>
+            <li class="disabled"><span class="x-mark">✕</span> Cursor, Windsurf, Copilot</li>
+            <li class="disabled"><span class="x-mark">✕</span> Custom prompt templates</li>
+          </ul>
+          <a href="#setup" class="pricing-btn" id="btn-pricing-byok">Get Started</a>
+        </div>
+
+        <!-- Pro Tier -->
+        <div class="pricing-card featured">
+          <div class="pricing-badge">MOST POPULAR</div>
+          <div class="pricing-tier">Pro</div>
+          <div class="pricing-price">
+            <span class="price-amount">$19</span>
+            <span class="price-period">/year</span>
+          </div>
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> 1,250 skills per month</li>
+            <li><span class="check">✓</span> All 5 agent systems</li>
+            <li><span class="check">✓</span> Local + Cloud modes</li>
+            <li><span class="check">✓</span> Enhanced skill quality</li>
+            <li><span class="check">✓</span> Custom prompt templates</li>
+            <li><span class="check">✓</span> Batch generation</li>
+            <li><span class="check">✓</span> Priority support</li>
+          </ul>
+          <a href="#" class="pricing-btn pro" id="btn-pricing-pro">Upgrade to Pro</a>
         </div>
       </div>
     </section>
@@ -190,7 +255,7 @@ description: Triggers when the user needs a 3D model.
         <div class="faq-item">
           <button class="faq-question" id="faq-q1">Is Tweet2Skill free? <span class="faq-toggle">+</span></button>
           <div class="faq-answer">
-            <p>Yes, Tweet2Skill is 100% open-source and free to use. By configuring your own Gemini API Key in the settings (which includes a generous free tier), you do not incur any AI token costs.</p>
+            <p>Yes! The free tier gives you 10 skill generations per day — no API key required. If you need more, you can bring your own Gemini API key for unlimited use, or upgrade to Pro ($19/year) for premium features like multi-agent export and custom templates.</p>
           </div>
         </div>
         <div class="faq-item">
@@ -202,7 +267,19 @@ description: Triggers when the user needs a 3D model.
         <div class="faq-item">
           <button class="faq-question" id="faq-q3">Where do the generated skills go? <span class="faq-toggle">+</span></button>
           <div class="faq-answer">
-            <p>Google Antigravity global skills are stored in <code>~/.gemini/config/skills/</code> and project skills in <code>.agents/skills/</code>. Claude Code global rules are stored in <code>~/.claude/rules/</code> and project rules in <code>.claude/rules/</code>.</p>
+            <p>It depends on the agent system. Antigravity skills go to <code>~/.gemini/config/skills/</code>, Claude rules to <code>~/.claude/rules/</code>, Cursor rules to <code>~/.cursor/rules/</code>, Windsurf rules to <code>~/.windsurfrules</code>, and Copilot instructions to <code>~/.github/copilot-instructions.md</code>.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" id="faq-q4">What's included in Pro? <span class="faq-toggle">+</span></button>
+          <div class="faq-answer">
+            <p>Pro ($19/year) includes up to 1,250 skill generations per month, export to all 5 agent systems (including Cursor, Windsurf, and GitHub Copilot), custom prompt templates, batch generation, enhanced skill quality with references and examples, and priority support.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" id="faq-q5">Do I need a Gemini API key? <span class="faq-toggle">+</span></button>
+          <div class="faq-answer">
+            <p>Not for the free tier or Pro! Free users get 10 daily generations powered by our server. Pro users get 1,250/month. If you prefer using your own key for unlimited, no-cap usage, you can enter it in the Advanced settings.</p>
           </div>
         </div>
       </div>
