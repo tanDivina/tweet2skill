@@ -423,3 +423,24 @@ input:focus {
   from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+.app-footer {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.app-footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition-smooth);
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
+  opacity: 0.95;
+}

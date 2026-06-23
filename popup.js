@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (settings.apiKey) {
     apiKeyInput.value = settings.apiKey;
   }
-  workspaceInput.value = settings.workspacePath || '/Users/dorienvandenabbeele/TweetSkill';
+  workspaceInput.value = settings.workspacePath || '';
   cloudUrlInput.value = settings.cloudUrl || '';
   if (settings.scope) {
     currentScope = settings.scope;
@@ -269,11 +269,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnGenerate.addEventListener('click', async () => {
     hideStatus();
     const { apiKey, workspacePath, connectionMode, cloudUrl } = await chrome.storage.local.get(['apiKey', 'workspacePath', 'connectionMode', 'cloudUrl']);
-    const wsPath = workspacePath || '/Users/dorienvandenabbeele/TweetSkill';
+    const wsPath = workspacePath || '';
     const connMode = connectionMode || 'local';
 
     if (!apiKey) {
       showStatus('error', 'Please configure your Gemini API Key in the Settings tab first.', '⚠️');
+      tabSettings.click();
+      return;
+    }
+
+    if (currentScope === 'workspace' && connMode === 'local' && !wsPath) {
+      showStatus('error', 'Please configure your Local Workspace Path in the Settings tab to use Workspace scope.', '⚠️');
       tabSettings.click();
       return;
     }
