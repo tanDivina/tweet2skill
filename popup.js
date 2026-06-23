@@ -73,29 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentConnMode = 'local'; // 'local' or 'cloud'
 
   // --- Initialize App ---
-  
-  // 1. Initial verification of Auth token
-  await checkAuthMe();
+  // (Initialization code moved to non-blocking init() function at the end)
 
-  // 2. Load settings from storage
-  const settings = await chrome.storage.local.get([
-    'apiKey', 'scope', 'workspacePath', 'system', 'connectionMode', 'cloudUrl'
-  ]);
-
-  if (settings.apiKey) apiKeyInput.value = settings.apiKey;
-  workspaceInput.value = settings.workspacePath || '';
-  cloudUrlInput.value = settings.cloudUrl || '';
-  
-  if (settings.scope) currentScope = settings.scope;
-  if (settings.system) currentSystem = settings.system;
-  if (settings.connectionMode) currentConnMode = settings.connectionMode;
-
-  updateScopeUI();
-  updateSystemUI();
-  updateConnModeUI();
-  
-  // 3. Initial UI refresh (badge, bars, locks, banner)
-  await refreshUI();
 
   // --- Tab Navigation ---
   function switchTab(activeTab, activeSect) {
@@ -282,22 +261,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // --- Detect Active Tab URL ---
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab && tab.url) {
-      activeTabUrl = tab.url;
-      activeTabTitle = tab.title || '';
-      if (activeUrlSpan) {
-        activeUrlSpan.textContent = activeTabUrl;
-        activeUrlSpan.title = activeTabUrl;
-      }
-    } else {
-      if (activeUrlSpan) activeUrlSpan.textContent = 'No active tab detected';
-    }
-  } catch (err) {
-    console.error('Failed to get active tab:', err);
-    if (activeUrlSpan) activeUrlSpan.textContent = 'Error detecting page';
-  }
+  // (Active tab detection moved to non-blocking init() function at the end)
 
   // --- Generate Skill Trigger ---
   if (btnGenerate) {
@@ -871,4 +835,55 @@ document.addEventListener('DOMContentLoaded', async () => {
       content: contentText
     };
   }
+
+  // --- Async Initialization ---
+  async function init() {
+    try {
+      // 1. Detect Active Tab URL
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab && tab.url) {
+        activeTabUrl = tab.url;
+        activeTabTitle = tab.title || '';
+        if (activeUrlSpan) {
+          activeUrlSpan.textContent = activeTabUrl;
+          activeUrlSpan.title = activeTabUrl;
+        }
+      } else {
+        if (activeUrlSpan) activeUrlSpan.textContent = 'No active tab detected';
+      }
+    } catch (err) {
+      console.error('Failed to get active tab:', err);
+      if (activeUrlSpan) activeUrlSpan.textContent = 'Error detecting page';
+    }
+
+    try {
+      // 2. Initial verification of Auth token
+      await checkAuthMe();
+
+      // 3. Load settings from storage
+      const settings = await chrome.storage.local.get([
+        'apiKey', 'scope', 'workspacePath', 'system', 'connectionMode', 'cloudUrl'
+      ]);
+
+      if (apiKeyInput && settings.apiKey) apiKeyInput.value = settings.apiKey;
+      if (workspaceInput) workspaceInput.value = settings.workspacePath || '';
+      if (cloudUrlInput) cloudUrlInput.value = settings.cloudUrl || '';
+      
+      if (settings.scope) currentScope = settings.scope;
+      if (settings.system) currentSystem = settings.system;
+      if (settings.connectionMode) currentConnMode = settings.connectionMode;
+
+      updateScopeUI();
+      updateSystemUI();
+      updateConnModeUI();
+      
+      // 4. Initial UI refresh (badge, bars, locks, banner)
+      await refreshUI();
+    } catch (err) {
+      console.error('Error during startup initialization:', err);
+    }
+  }
+
+  // Run initialization
+  init();
 });
