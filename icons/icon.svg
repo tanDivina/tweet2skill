@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="36 28 56 56" width="128" height="128">
   <!-- Stylized message bubble (tweet/post) -->
   <path d="M88 56c0-11-10.7-20-24-20s-24 9-24 20c0 4.2 1.5 8.1 4.1 11.2l-3.1 9.8 9.8-3.1c3.5 2 7.4 3.1 11.2 3.1 13.3 0 24-9 24-20z" 
-        fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+        fill="#e2e8f0" stroke="#000000" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
   
   <!-- Neon green plus sign (generating/saving to skill) -->
   <line x1="64" y1="46" x2="64" y2="66" stroke="#a8ff35" stroke-width="4" stroke-linecap="round" />

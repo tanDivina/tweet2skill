@@ -2,7 +2,7 @@
   <img src="icons/icon.svg" width="96" height="96" alt="Tweet2Skill Logo"/>
 </p>
 
-<h1 align="center">Tweet2Skill 🚀</h1>
+<h1 align="center">Tweet2Skill</h1>
 
 <p align="center">
   <strong>Convert X/Twitter tweets, threads, or web pages into Google Antigravity Agent Skills & Claude Rules with one click.</strong>
