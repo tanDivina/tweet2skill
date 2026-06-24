@@ -911,27 +911,193 @@ body::after {
   }
 }
 
-/* High-Fidelity UI Showcase Hero styles */
-.showcase-card {
-  flex: 1;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  transition: var(--transition-smooth);
+/* Real HTML/CSS mockup of our actual Extension Popup */
+.ext-mockup {
+  width: 320px;
+  background: linear-gradient(180deg, #0a0a0c 0%, #111115 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  font-family: var(--font-sans);
+  color: #ffffff;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+  text-align: left;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0 auto;
 }
 
-.showcase-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(var(--accent-rgb), 0.3);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 25px rgba(var(--accent-rgb), 0.05);
+.ext-mockup-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.showcase-image {
+.ext-mockup-logo-box {
+  border: 1.5px solid #ffffff;
+  padding: 10px 8px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.ext-mockup-logo-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
+}
+
+.ext-mockup-logo-badge {
+  position: absolute;
+  right: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.ext-mockup-brand-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+
+.ext-mockup-brand-tagline {
+  font-size: 7px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.ext-mockup-tab-nav {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ext-mockup-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.ext-mockup-tab-btn.active {
+  background: #ffffff;
+  color: #000000;
+}
+
+.ext-mockup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ext-mockup-url-badge {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ext-mockup-url-badge .badge-label {
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.ext-mockup-url-badge .badge-value {
+  color: #ffffff;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.ext-mockup-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ext-mockup-control-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ext-mockup-toggle-group {
+  display: flex;
+  gap: 8px;
+}
+
+.ext-mockup-toggle-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ext-mockup-toggle-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.ext-mockup-toggle-btn.locked {
+  opacity: 0.4;
+}
+
+.ext-mockup-primary-btn {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-top: 4px;
 }
 
 /* Extension Section Card */
@@ -979,8 +1145,8 @@ body::after {
 }
 
 .section-title.left-align {
-  text-align: left;
-  margin-bottom: 16px;
+  text-align: left !important;
+  margin-bottom: 16px !important;
   font-size: 32px;
 }
 
@@ -1033,29 +1199,6 @@ body::after {
   justify-content: center;
   align-items: center;
   position: relative;
-}
-
-.extension-frame {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid var(--border-active);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-  background: var(--bg-primary);
-  width: 100%;
-  max-width: 320px;
-  transition: var(--transition-smooth);
-}
-
-.extension-frame:hover {
-  transform: scale(1.03) rotate(1deg);
-  border-color: var(--accent);
-  box-shadow: 0 20px 45px rgba(var(--accent-rgb), 0.15);
-}
-
-.extension-img {
-  width: 100%;
-  height: auto;
-  display: block;
 }
 
 /* Responsive adjustments for extension section */

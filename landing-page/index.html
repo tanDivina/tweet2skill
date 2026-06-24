@@ -45,10 +45,27 @@
         <a href="#pricing" class="secondary-btn" id="btn-hero-pricing">See Pricing</a>
       </div>
 
-      <!-- High-Fidelity UI Showcase -->
+      <!-- Animated UI Showcase -->
       <div class="showcase-container">
-        <div class="showcase-card left-card">
-          <img src="extension_popup_mockup.png" alt="Tweet2Skill Chrome Extension popup interface" class="showcase-image">
+        <div class="mock-window tweet-window">
+          <div class="mock-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="title-text">x.com/dorien_vibecodes/status/12345</span>
+          </div>
+          <div class="mock-body">
+            <div class="tweet-user">
+              <div class="avatar">DV</div>
+              <div class="user-info">
+                <span class="name">DorienVibecodes</span>
+                <span class="handle">@dorien_vibecodes</span>
+              </div>
+            </div>
+            <div class="tweet-content">
+              🤖 Quick Antigravity / Claude Code tip! When building a 3D asset generation agent, always structure the prompt to cull low-opacity points from Gaussian splats first. This reduces the final file size by 40% and ensures rendering doesn't crash on mobile device frame rates.
+            </div>
+          </div>
         </div>
 
         <div class="showcase-arrow">
@@ -56,8 +73,27 @@
           <div class="arrow-head"></div>
         </div>
 
-        <div class="showcase-card right-card">
-          <img src="tweet_to_skill_demo.png" alt="Tweet to AI Agent Skill conversion demo" class="showcase-image">
+        <div class="mock-window code-window">
+          <div class="mock-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="title-text">generate-3d-model.md</span>
+          </div>
+          <div class="mock-body">
+            <pre><code><span class="comment">---
+name: generate-3d-model
+description: Triggers when the user needs a 3D model.
+---</span>
+
+<span class="keyword"># Generate 3D Model</span>
+
+<span class="section">## Instructions</span>
+1. Optimize the generated 3D splat by culling
+   low-opacity and low-scale points.
+2. Ensure file size is kept under 10MB to
+   prevent mobile rendering crashes.</code></pre>
+          </div>
         </div>
       </div>
     </header>
@@ -135,8 +171,57 @@
         </div>
 
         <div class="extension-preview">
-          <div class="extension-frame">
-            <img src="extension_popup_mockup.png" alt="Tweet2Skill Chrome Extension popup mockup" class="extension-img">
+          <!-- Real HTML/CSS mockup of our actual Extension Popup -->
+          <div class="ext-mockup">
+            <header class="ext-mockup-header">
+              <div class="ext-mockup-logo-box">
+                <div class="ext-mockup-logo-top-row">
+                  <div class="ext-mockup-logo-icon-container">
+                    <svg class="brand-logo-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                      <line x1="12" y1="8" x2="12" y2="16"></line>
+                      <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                  </div>
+                  <div class="ext-mockup-logo-badge">
+                    <span class="usage-badge-text">2/10</span>
+                  </div>
+                </div>
+                <h1 class="ext-mockup-brand-title">Tweet2Skill</h1>
+                <div class="ext-mockup-brand-tagline">EXTRACT WEB // BUILD SKILLS // EMPOWER AGENTS</div>
+              </div>
+              <nav class="ext-mockup-tab-nav">
+                <button class="ext-mockup-tab-btn active">Linker</button>
+                <button class="ext-mockup-tab-btn">Settings</button>
+                <button class="ext-mockup-tab-btn">Account</button>
+              </nav>
+            </header>
+
+            <main class="ext-mockup-content">
+              <div class="ext-mockup-url-badge">
+                <span class="badge-label">Active Page:</span>
+                <span class="badge-value">x.com/dorien_vibecodes/status/12345</span>
+              </div>
+
+              <div class="ext-mockup-control-group">
+                <label>Agent System</label>
+                <div class="ext-mockup-toggle-group">
+                  <button class="ext-mockup-toggle-btn active">Antigravity</button>
+                  <button class="ext-mockup-toggle-btn">Claude Code</button>
+                  <button class="ext-mockup-toggle-btn locked">Cursor 🔒</button>
+                </div>
+              </div>
+
+              <div class="ext-mockup-control-group">
+                <label>Target Scope</label>
+                <div class="ext-mockup-toggle-group">
+                  <button class="ext-mockup-toggle-btn active">Global</button>
+                  <button class="ext-mockup-toggle-btn">Workspace</button>
+                </div>
+              </div>
+
+              <button class="ext-mockup-primary-btn">Turn into Skill</button>
+            </main>
           </div>
         </div>
       </div>
@@ -222,14 +307,13 @@
       <div class="setup-content">
         <!-- Tab 1: Extension -->
         <div id="setup-extension" class="tab-pane active">
-          <h3>Load the Unpacked Chrome Extension</h3>
+          <h3>Install Chrome Extension</h3>
           <ol class="step-list">
-            <li>Download the project files or clone the repository:
-              <pre><code>git clone https://github.com/tanDivina/TweetSkill.git</code></pre>
-            </li>
+            <li>Download the extension ZIP package from your user dashboard or download link.</li>
+            <li>Extract the ZIP package to a directory on your local computer (e.g., <code>~/Tweet2Skill</code>).</li>
             <li>Open Google Chrome and navigate to <code class="url-code">chrome://extensions/</code>.</li>
             <li>Enable **Developer mode** using the toggle in the top-right corner.</li>
-            <li>Click the **Load unpacked** button (top-left) and select this project directory.</li>
+            <li>Click the **Load unpacked** button (top-left) and select the extracted project directory.</li>
             <li>Copy the generated **Extension ID** on the card—you'll need it to pair the native host.</li>
           </ol>
         </div>
