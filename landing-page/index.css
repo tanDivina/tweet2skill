@@ -98,13 +98,8 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  border: 1.5px solid var(--text-primary);
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+  width: 24px;
+  height: 24px;
 }
 
 .brand-logo-svg {
@@ -453,7 +448,6 @@ body::after {
 .feature-icon {
   font-size: 24px;
   margin-bottom: 20px;
-  display: inline-block;
   width: 48px;
   height: 48px;
   border-radius: 8px;
@@ -462,6 +456,18 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.feature-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: var(--accent);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon svg {
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(0 0 8px rgba(168, 255, 53, 0.5));
 }
 
 .feature-card h3 {
@@ -1201,8 +1207,35 @@ body::after {
 }
 
 .feat-bullet {
-  font-size: 20px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-light);
+  color: var(--accent);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.feat-bullet svg {
+  width: 18px;
+  height: 18px;
+  stroke: var(--accent);
+  transition: all 0.3s ease;
+}
+
+.ext-feat:hover .feat-bullet {
+  border-color: rgba(var(--accent-rgb), 0.3);
+  background-color: rgba(var(--accent-rgb), 0.05);
+  box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.15);
+}
+
+.ext-feat:hover .feat-bullet svg {
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(0 0 8px rgba(168, 255, 53, 0.4));
 }
 
 .ext-feat strong {
