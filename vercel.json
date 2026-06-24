@@ -15,5 +15,13 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Device-Id, X-Request-Signature" }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.tweet2skill.hero-apps.com" }],
+      "destination": "https://tweet2skill.hero-apps.com/$1",
+      "statusCode": 301
+    }
   ]
 }

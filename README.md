@@ -1,6 +1,17 @@
-# Tweet2Skill 🚀
+<p align="center">
+  <img src="icons/icon.svg" width="96" height="96" alt="Tweet2Skill Logo"/>
+</p>
 
-Convert X/Twitter tweets, threads, or web page content directly into **Google Antigravity Custom Agent Skills** or **Claude Code Rules** with a single click.
+<h1 align="center">Tweet2Skill 🚀</h1>
+
+<p align="center">
+  <strong>Convert X/Twitter tweets, threads, or web pages into Google Antigravity Agent Skills & Claude Rules with one click.</strong>
+</p>
+
+<p align="center">
+  <a href="https://tweet2skill.hero-apps.com"><strong>🌐 Live Website</strong></a> • 
+  <a href="https://x.com/DorienVibecodes"><strong>🐦 Connect on X (Twitter)</strong></a>
+</p>
 
 ---
 
