@@ -532,6 +532,22 @@ body::after {
   font-size: 40px;
   margin-bottom: 18px;
   line-height: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.user-step-icon svg {
+  width: 44px;
+  height: 44px;
+  stroke: var(--accent);
+  filter: drop-shadow(0 0 8px rgba(168, 255, 53, 0.2));
+  transition: all 0.3s ease;
+}
+
+.user-step-card:hover .user-step-icon svg {
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(0 0 12px rgba(168, 255, 53, 0.5));
 }
 
 .user-step-title {
