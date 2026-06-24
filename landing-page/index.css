@@ -5,6 +5,7 @@
   --bg-secondary: #0c0c0f;
   --bg-tertiary: #131317;
   --accent: #a8ff35;
+  --accent-alt: #7cd315;
   --accent-rgb: 168, 255, 53;
   --text-primary: #ffffff;
   --text-secondary: #a1a1a6;
@@ -494,7 +495,8 @@ body::after {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 28px;
-  margin-top: 56px;
+  margin-top: 36px;
+  padding-top: 20px;
   margin-bottom: 48px;
 }
 
