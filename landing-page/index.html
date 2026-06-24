@@ -25,6 +25,7 @@
       </div>
       <div class="nav-links">
         <a href="#features">Features</a>
+        <a href="#extension">Extension</a>
         <a href="#pricing">Pricing</a>
         <a href="#setup">Setup</a>
         <a href="#faq">FAQ</a>
@@ -44,27 +45,10 @@
         <a href="#pricing" class="secondary-btn" id="btn-hero-pricing">See Pricing</a>
       </div>
 
-      <!-- Animated UI Showcase -->
+      <!-- High-Fidelity UI Showcase -->
       <div class="showcase-container">
-        <div class="mock-window tweet-window">
-          <div class="mock-header">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-            <span class="title-text">x.com/dorien_vibecodes/status/12345</span>
-          </div>
-          <div class="mock-body">
-            <div class="tweet-user">
-              <div class="avatar">DV</div>
-              <div class="user-info">
-                <span class="name">DorienVibecodes</span>
-                <span class="handle">@dorien_vibecodes</span>
-              </div>
-            </div>
-            <div class="tweet-content">
-              🤖 Quick Antigravity / Claude Code tip! When building a 3D asset generation agent, always structure the prompt to cull low-opacity points from Gaussian splats first. This reduces the final file size by 40% and ensures rendering doesn't crash on mobile device frame rates.
-            </div>
-          </div>
+        <div class="showcase-card left-card">
+          <img src="extension_popup_mockup.png" alt="Tweet2Skill Chrome Extension popup interface" class="showcase-image">
         </div>
 
         <div class="showcase-arrow">
@@ -72,27 +56,8 @@
           <div class="arrow-head"></div>
         </div>
 
-        <div class="mock-window code-window">
-          <div class="mock-header">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-            <span class="title-text">generate-3d-model.md</span>
-          </div>
-          <div class="mock-body">
-            <pre><code><span class="comment">---
-name: generate-3d-model
-description: Triggers when the user needs a 3D model.
----</span>
-
-<span class="keyword"># Generate 3D Model</span>
-
-<span class="section">## Instructions</span>
-1. Optimize the generated 3D splat by culling
-   low-opacity and low-scale points.
-2. Ensure file size is kept under 10MB to
-   prevent mobile rendering crashes.</code></pre>
-          </div>
+        <div class="showcase-card right-card">
+          <img src="tweet_to_skill_demo.png" alt="Tweet to AI Agent Skill conversion demo" class="showcase-image">
         </div>
       </div>
     </header>
@@ -120,6 +85,59 @@ description: Triggers when the user needs a 3D model.
           <div class="feature-icon">🔒</div>
           <h3>Privacy First</h3>
           <p>Your Gemini API keys are stored securely inside your local browser storage. No credentials ever touch third-party servers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Extension Banner Card Section -->
+    <section id="extension" class="extension-section">
+      <div class="extension-card">
+        <div class="extension-content">
+          <div class="extension-badge">FREE BROWSER ADDON</div>
+          <h2 class="section-title left-align">Supercharge Your Browser with Tweet2Skill</h2>
+          <p class="extension-description">
+            Install the lightweight browser companion to extract tweets, threads, and documentation with a single click. Save skills directly to your local workspace directories or download them on the fly.
+          </p>
+          
+          <div class="extension-features-list">
+            <div class="ext-feat">
+              <span class="feat-bullet">⚡</span>
+              <div>
+                <strong>Instant DOM Extraction</strong>
+                <span>Highlight text or extract full threads from X (Twitter) automatically.</span>
+              </div>
+            </div>
+            <div class="ext-feat">
+              <span class="feat-bullet">📂</span>
+              <div>
+                <strong>Direct Workspace Sync</strong>
+                <span>Runs with our local host bridge to write files silently behind the scenes.</span>
+              </div>
+            </div>
+            <div class="ext-feat">
+              <span class="feat-bullet">🔑</span>
+              <div>
+                <strong>Bring Your Own Key (BYOK)</strong>
+                <span>Set your own Gemini API Key in the extension for unlimited generations.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="extension-actions">
+            <a href="#setup" class="primary-btn">Get Started & Install</a>
+            <a href="https://github.com/tanDivina/TweetSkill" target="_blank" class="secondary-btn">
+              <svg class="git-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+              View on GitHub
+            </a>
+          </div>
+        </div>
+
+        <div class="extension-preview">
+          <div class="extension-frame">
+            <img src="extension_popup_mockup.png" alt="Tweet2Skill Chrome Extension popup mockup" class="extension-img">
+          </div>
         </div>
       </div>
     </section>
