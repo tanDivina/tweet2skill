@@ -1,6 +1,19 @@
-# Tweet2Skill Chrome Extension & Native Bridge
+<p align="center">
+  <img src="icons/icon.svg" width="96" height="96" alt="Tweet2Skill Logo"/>
+</p>
 
-**Tweet2Skill** is a lightweight browser companion utility designed for developers using AI coding agents. It extracts content (such as documentation, code snippets, or full threads on X/Twitter) from your browser and parses it into structured **Skills** or **Rules** for agent environments.
+<h1 align="center">Tweet2Skill 🚀</h1>
+
+<p align="center">
+  <strong>Convert X/Twitter tweets, threads, or web pages into Google Antigravity Agent Skills & Claude Rules with one click.</strong>
+</p>
+
+<p align="center">
+  <a href="https://tweet2skill.hero-apps.com"><strong>🌐 Live Website</strong></a> • 
+  <a href="https://x.com/DorienVibecodes"><strong>🐦 Connect on X (Twitter)</strong></a>
+</p>
+
+---
 
 ## Supported Editor & Agent Systems
 - **Google Antigravity:** Generates skill directories (`SKILL.md`) under `~/.gemini/config/skills/` or project-scoped `.agents/skills/`.
