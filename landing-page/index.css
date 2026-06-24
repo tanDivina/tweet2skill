@@ -986,7 +986,7 @@ body::after {
 }
 
 .ext-mockup-logo-box {
-  border: 1.5px solid #ffffff;
+  border: none;
   padding: 10px 8px;
   text-align: center;
   background: rgba(0, 0, 0, 0.4);

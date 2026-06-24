@@ -65,7 +65,7 @@ body {
 
 /* Logo Box Matching Brand Style */
 .logo-box {
-  border: 1.5px solid var(--primary);
+  border: none;
   padding: 12px 8px;
   text-align: center;
   margin-bottom: 16px;
