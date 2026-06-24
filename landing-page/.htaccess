@@ -3,7 +3,11 @@
     RewriteEngine On
     RewriteBase /
 
-    # Redirect HTTP to HTTPS
+    # Redirect www → non-www (preserve protocol)
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+    # Force HTTPS for remaining traffic
     RewriteCond %{HTTPS} off
     RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/ [NC]
     RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
