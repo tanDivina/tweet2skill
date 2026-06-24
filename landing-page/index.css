@@ -601,8 +601,22 @@ body::after {
 }
 
 .dev-callout-icon {
-  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.dev-callout-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: var(--accent);
+  transition: var(--transition-smooth);
+}
+
+.dev-callout:hover .dev-callout-icon svg {
+  transform: scale(1.18) rotate(-8deg);
+  filter: drop-shadow(0 0 10px rgba(168, 255, 53, 0.7));
 }
 
 .dev-callout-body {
