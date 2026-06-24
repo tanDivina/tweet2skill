@@ -1,0 +1,11 @@
+# Local log files
+host.log
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS system files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-box">
+        <div class="logo-top-row">
+          <div class="logo-icon-container">
+            <svg class="brand-logo-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </div>
+          <div id="usage-badge" class="usage-badge" title="Daily usage">
+            <span class="usage-badge-text">—</span>
+          </div>
+        </div>
+        <h1 class="brand-title">Tweet2Skill</h1>
+        <div class="brand-tagline">EXTRACT WEB // BUILD SKILLS // EMPOWER AGENTS</div>
+      </div>
+      <nav class="tab-nav">
+        <button id="tab-generator" class="tab-btn active">Linker</button>
+        <button id="tab-settings" class="tab-btn">Settings</button>
+        <button id="tab-account" class="tab-btn">Account</button>
+      </nav>
+    </header>
+
+    <!-- Content Sections -->
+    <main class="app-content">
+      <!-- Linker / Generator Section -->
+      <section id="sect-generator" class="content-section active">
+        <div class="url-badge">
+          <span class="badge-label">Active Page:</span>
+          <span id="active-url" class="badge-value">Detecting...</span>
+        </div>
+
+        <div class="control-group">
+          <label for="system-selector">Agent System</label>
+          <div class="toggle-group toggle-group-wrap">
+            <button id="system-antigravity" class="toggle-btn active" data-system="antigravity">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="6"></circle>
+                <path d="M3 16c6-3 12-3 18 0"></path>
+              </svg>
+              <span>Antigravity</span>
+            </button>
+            <button id="system-claude" class="toggle-btn" data-system="claude">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              <span>Claude Code</span>
+            </button>
+            <button id="system-cursor" class="toggle-btn" data-system="cursor">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 3l14 9-14 9V3z"></path>
+              </svg>
+              <span>Cursor</span>
+              <svg class="pro-lock-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a4 4 0 0 0-4 4v2H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5a4 4 0 0 0-4-4zm2.5 6H5.5V5a2.5 2.5 0 0 1 5 0v2z"/></svg>
+            </button>
+            <button id="system-windsurf" class="toggle-btn" data-system="windsurf">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+              </svg>
+              <span>Windsurf</span>
+              <svg class="pro-lock-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a4 4 0 0 0-4 4v2H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5a4 4 0 0 0-4-4zm2.5 6H5.5V5a2.5 2.5 0 0 1 5 0v2z"/></svg>
+            </button>
+            <button id="system-copilot" class="toggle-btn" data-system="copilot">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                <line x1="15" y1="9" x2="15.01" y2="9"></line>
+              </svg>
+              <span>Copilot</span>
+              <svg class="pro-lock-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a4 4 0 0 0-4 4v2H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5a4 4 0 0 0-4-4zm2.5 6H5.5V5a2.5 2.5 0 0 1 5 0v2z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="scope-selector">Target Scope</label>
+          <div class="toggle-group">
+            <button id="scope-global" class="toggle-btn active" data-scope="global">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <span>Global</span>
+            </button>
+            <button id="scope-workspace" class="toggle-btn" data-scope="workspace">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Workspace</span>
+            </button>
+          </div>
+          <p class="help-text" id="scope-help">Saves to ~/.gemini/config/skills/</p>
+        </div>
+
+        <button id="btn-generate" class="primary-btn">
+          <span class="btn-text">Turn into Skill</span>
+          <div class="btn-loader hidden">
+            <span class="spinner"></span>
+          </div>
+        </button>
+
+        <!-- Upgrade Banner (hidden by default) -->
+        <div id="upgrade-banner" class="upgrade-banner hidden">
+          <div class="upgrade-banner-content">
+            <div class="upgrade-banner-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+            <div class="upgrade-banner-text">
+              <strong>Daily limit reached!</strong>
+              <span>Upgrade to Pro or use your own API key</span>
+            </div>
+          </div>
+          <div class="upgrade-banner-actions">
+            <button id="btn-upgrade-banner" class="upgrade-btn-gold">Upgrade $19/yr</button>
+            <button id="btn-byok-banner" class="upgrade-btn-secondary">Use Own Key</button>
+          </div>
+        </div>
+
+        <div id="status-container" class="status-box hidden">
+          <div class="status-icon"></div>
+          <div class="status-message"></div>
+        </div>
+      </section>
+
+      <!-- Settings Section -->
+      <section id="sect-settings" class="content-section">
+        <div class="control-group">
+          <label for="connection-selector">Connection Mode</label>
+          <div class="toggle-group">
+            <button id="conn-local" class="toggle-btn active" data-conn="local">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+              </svg>
+              <span>Local Host</span>
+            </button>
+            <button id="conn-cloud" class="toggle-btn" data-conn="cloud">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+              </svg>
+              <span>Cloud Vercel</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="control-group" id="group-cloud-url">
+          <label for="cloud-url-input">Vercel Endpoint URL</label>
+          <input type="text" id="cloud-url-input" placeholder="https://your-project.vercel.app">
+          <p class="help-text">URL of your Vercel deployment (includes /api/generate)</p>
+        </div>
+
+        <div class="control-group" id="group-workspace-path">
+          <label for="workspace-input">Local Workspace Path</label>
+          <input type="text" id="workspace-input" placeholder="/Users/username/my-project">
+          <p class="help-text">Absolute path to save workspace-scoped skills (under .agents/skills/)</p>
+        </div>
+
+        <!-- Collapsible BYOK Section -->
+        <div class="collapsible-section">
+          <button class="collapsible" id="byok-toggle">
+            <span>Advanced: Bring Your Own Key</span>
+            <svg class="collapsible-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <div class="collapsible-content" id="byok-content">
+            <div class="control-group" id="group-api-key">
+              <label for="api-key-input">Gemini API Key</label>
+              <div class="input-wrapper">
+                <input type="password" id="api-key-input" placeholder="AIzaSy..." autocomplete="off">
+                <button id="btn-toggle-key" class="icon-btn" title="Toggle Visibility">
+                  <svg class="eye-icon open-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+              <p class="help-text">Your key is stored locally in Chrome. Use this to bypass daily limits as a BYOK user.</p>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-save-settings" class="secondary-btn">Save Settings</button>
+      </section>
+
+      <!-- Account Section -->
+      <section id="sect-account" class="content-section">
+        <!-- Logged-out state -->
+        <div id="account-logged-out" class="account-section">
+          <div class="account-hero">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted);">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <p class="account-hero-text">Sign in to track usage, upgrade to Pro, and unlock premium agent systems.</p>
+          </div>
+          <button id="btn-google-signin" class="google-sign-in-btn">
+            <svg class="google-g-icon" width="18" height="18" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            <span>Sign in with Google</span>
+          </button>
+        </div>
+
+        <!-- Logged-in state -->
+        <div id="account-logged-in" class="account-section hidden">
+          <div class="account-profile">
+            <div class="account-avatar" id="account-avatar">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="account-info">
+              <span class="account-email" id="account-email">user@example.com</span>
+              <span class="tier-badge" id="tier-badge">FREE</span>
+            </div>
+          </div>
+
+          <div class="usage-stats">
+            <div class="usage-stat-item">
+              <div class="usage-stat-header">
+                <span class="usage-stat-label">Daily Usage</span>
+                <span class="usage-stat-value" id="usage-daily-text">0 / 10</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" id="usage-daily-bar" style="width: 0%"></div>
+              </div>
+            </div>
+            <div class="usage-stat-item">
+              <div class="usage-stat-header">
+                <span class="usage-stat-label">Monthly Usage</span>
+                <span class="usage-stat-value" id="usage-monthly-text">0 / 100</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill progress-bar-fill-monthly" id="usage-monthly-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-upgrade-pro" class="upgrade-pro-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span>Upgrade to Pro — $19/yr</span>
+          </button>
+
+          <button id="btn-logout" class="secondary-btn logout-btn">Log Out</button>
+        </div>
+      </section>
+    </main>
+    <footer class="app-footer">
+      <span>Built by <a href="https://x.com/dorienvibecodes" target="_blank" id="lnk-x-profile">@dorienvibecodes</a></span>
+    </footer>
+  </div>
+  <script src="auth.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
