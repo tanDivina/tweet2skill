@@ -12,7 +12,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = os.path.join(SCRIPT_DIR, "host.log")
 
 # Proxy API base URL
-PROXY_API_BASE = "https://tweet2skill.hero-apps.com"
+PROXY_API_BASE = "https://tweetskill.vercel.app"
 
 def log(message):
     """Write log messages to a local file to avoid cluttering stdout."""

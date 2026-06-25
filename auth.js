@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  const DEFAULT_API_BASE = 'https://tweet2skill.hero-apps.com';
+  const DEFAULT_API_BASE = 'https://tweetskill.vercel.app';
 
   // ---------------------------------------------------------------------------
   // Helpers
