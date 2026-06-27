@@ -4,6 +4,10 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
+    },
+    {
+      "source": "/((?!api/|api$).*)",
+      "destination": "/landing-page/$1"
     }
   ],
   "headers": [
