@@ -526,20 +526,20 @@ body::after {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid #ffffff;
   background: var(--bg-primary);
-  color: var(--accent);
+  color: #ffffff;
   font-size: 15px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(168, 255, 53, 0.15);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
   transition: var(--transition-smooth);
 }
 
 .user-step-card:hover .user-step-number {
-  box-shadow: 0 4px 20px rgba(168, 255, 53, 0.35);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
   transform: translateX(-50%) scale(1.05);
 }
 
