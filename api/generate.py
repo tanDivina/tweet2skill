@@ -106,6 +106,23 @@ SYSTEM_PROMPTS = {
     ),
 }
 
+CLAUDE_SKILL_PROMPT = (
+    "You are a Claude Code Skill generator. Take the provided web or tweet content "
+    "and convert it into a structured Markdown block representing a Claude Code agent skill.\n\n"
+    "The output must exactly follow this format, including the YAML frontmatter (between triple-dashes):\n"
+    "---\n"
+    "name: [Short, clear, lowercase, kebab-case action-oriented skill name matching directory slug]\n"
+    "description: [One or two sentences explaining exactly WHEN the agent should trigger and use this skill]\n"
+    "---\n\n"
+    "# [Skill Name in Title Case]\n\n"
+    "[Brief description of what this skill does and when to use it.]\n\n"
+    "## Instructions\n"
+    "[Convert the core rules, steps, or prompts in the provided content into precise, clean, action-oriented agent guidelines.]\n\n"
+    "CRITICAL RULES:\n"
+    "1. Start the response directly with the triple-dashes (---). DO NOT wrap your output in ```markdown or ``` block code fences.\n"
+    "2. Do not add any conversational text before or after the markdown block."
+)
+
 # Enhanced system prompt suffix for Pro tier
 PRO_ENHANCEMENT = (
     "\n\nADDITIONAL PRO ENHANCEMENTS:\n"
@@ -135,11 +152,15 @@ def slugify(text):
     return text.strip('-')
 
 
-def call_gemini_api(api_key, content, source_url, agent_system="antigravity", is_pro=False):
+def call_gemini_api(api_key, content, source_url, agent_system="antigravity", is_pro=False, agent_format="rule"):
     """Send text to the Gemini API and return the generated markdown."""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
 
-    system_prompt = SYSTEM_PROMPTS.get(agent_system, SYSTEM_PROMPTS["antigravity"])
+    if agent_system == "claude" and agent_format == "skill":
+        system_prompt = CLAUDE_SKILL_PROMPT
+    else:
+        system_prompt = SYSTEM_PROMPTS.get(agent_system, SYSTEM_PROMPTS["antigravity"])
+
     if is_pro:
         system_prompt += PRO_ENHANCEMENT
 
@@ -206,9 +227,9 @@ def json_response(handler, status_code, data):
     handler.wfile.write(json.dumps(data).encode("utf-8"))
 
 
-def extract_title_and_slug(generated_content, agent_system, fallback_title):
+def extract_title_and_slug(generated_content, agent_system, fallback_title, agent_format="rule"):
     """Extract title and slug from generated content based on agent system."""
-    if agent_system == "antigravity":
+    if agent_system == "antigravity" or (agent_system == "claude" and agent_format == "skill"):
         name_match = re.search(r"^name:\s*([^\n]+)", generated_content, re.MULTILINE)
         skill_name = (
             name_match.group(1).strip().strip("\"'") if name_match
@@ -266,6 +287,7 @@ class handler(BaseHTTPRequestHandler):
         title = payload.get("title", "")
         content = payload.get("content", "")
         agent_system = payload.get("agentSystem", "antigravity")
+        agent_format = payload.get("agentFormat", "rule")
         export_agents = payload.get("exportAgents", None)  # Pro multi-agent
 
         if not content:
@@ -362,10 +384,10 @@ class handler(BaseHTTPRequestHandler):
             results = {}
 
             for agent in agents_to_generate:
-                generated = call_gemini_api(api_key, content, url, agent, is_pro)
+                generated = call_gemini_api(api_key, content, url, agent, is_pro, agent_format=agent_format)
                 generated = clean_markdown(generated)
                 agent_title, agent_slug, agent_filename = extract_title_and_slug(
-                    generated, agent, title
+                    generated, agent, title, agent_format=agent_format
                 )
                 results[agent] = {
                     "markdown": generated,

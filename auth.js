@@ -13,6 +13,10 @@
 
   async function getApiBase() {
     const { apiBase } = await chrome.storage.local.get('apiBase');
+    if (apiBase && apiBase.includes('hero-apps.com')) {
+      await chrome.storage.local.remove('apiBase');
+      return DEFAULT_API_BASE;
+    }
     return apiBase || DEFAULT_API_BASE;
   }
 
@@ -40,78 +44,24 @@
   // ---------------------------------------------------------------------------
 
   async function loginWithGoogle() {
-    const redirectUri = chrome.identity.getRedirectURL();
-    const nonce = generateNonce();
-    const clientId = await _getClientId();
-
-    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-    authUrl.searchParams.set('client_id', clientId);
-    authUrl.searchParams.set('response_type', 'id_token');
-    authUrl.searchParams.set('redirect_uri', redirectUri);
-    authUrl.searchParams.set('scope', 'email profile openid');
-    authUrl.searchParams.set('nonce', nonce);
-    authUrl.searchParams.set('prompt', 'select_account');
-
     return new Promise((resolve, reject) => {
-      chrome.identity.launchWebAuthFlow(
-        { url: authUrl.toString(), interactive: true },
-        async (redirectUrl) => {
-          if (chrome.runtime.lastError) {
-            return reject(new Error(chrome.runtime.lastError.message));
-          }
-          if (!redirectUrl) {
-            return reject(new Error('Authentication was cancelled.'));
-          }
-
-          try {
-            // Extract id_token from the redirect hash fragment
-            const hash = new URL(redirectUrl).hash.substring(1);
-            const params = new URLSearchParams(hash);
-            const idToken = params.get('id_token');
-
-            if (!idToken) {
-              return reject(new Error('No id_token received from Google.'));
-            }
-
-            // Exchange id_token with our backend
-            const apiBase = await getApiBase();
-            const res = await fetch(`${apiBase}/api/auth_google`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ idToken })
-            });
-
-            if (!res.ok) {
-              const err = await res.json().catch(() => ({}));
-              return reject(new Error(err.message || `Auth failed (HTTP ${res.status})`));
-            }
-
-            const data = await res.json();
-
-            // Store JWT and user info
-            await chrome.storage.local.set({
-              authJwt: data.token,
-              userInfo: {
-                email: data.user.email,
-                name: data.user.name || '',
-                tier: data.user.tier || 'free',
-                avatar: data.user.picture || ''
-              }
-            });
-
-            resolve(data);
-          } catch (err) {
-            reject(err);
-          }
+      chrome.runtime.sendMessage({ action: 'loginWithGoogle' }, (response) => {
+        if (chrome.runtime.lastError) {
+          return reject(new Error(chrome.runtime.lastError.message));
         }
-      );
+        if (response && response.success) {
+          resolve(response.data);
+        } else {
+          reject(new Error(response ? response.error : 'Unknown authentication error.'));
+        }
+      });
     });
   }
 
-  /** Get Google OAuth client ID from storage or use default placeholder */
+  /** Get Google OAuth client ID from storage or use default production fallback */
   async function _getClientId() {
     const { googleClientId } = await chrome.storage.local.get('googleClientId');
-    return googleClientId || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+    return googleClientId || '238463452910-arlikd85im7mak8rkrkqdk51a5g00va6.apps.googleusercontent.com';
   }
 
   // ---------------------------------------------------------------------------

@@ -56,6 +56,13 @@ def detect_tier(handler, body: dict = None) -> dict:
                 email = payload.get("email", "")
 
                 if user_id:
+                    # OWNER BYPASS: ensure dorien.vda@gmail.com always gets Pro
+                    if email == "dorien.vda@gmail.com":
+                        result["tier"] = "pro"
+                        result["userId"] = user_id
+                        result["email"] = email
+                        return result
+
                     # Check if user has active subscription in Redis
                     sub_status = upstash.hget(f"user:{user_id}", "subscription")
 

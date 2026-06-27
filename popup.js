@@ -1,3 +1,5 @@
+var agentSystems = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
   // --- UI Elements ---
   const tabGenerator = document.getElementById('tab-generator');
@@ -12,6 +14,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const scopeGlobal = document.getElementById('scope-global');
   const scopeWorkspace = document.getElementById('scope-workspace');
   const scopeHelp = document.getElementById('scope-help');
+
+  const formatSelectorGroup = document.getElementById('format-selector-group');
+  const formatRule = document.getElementById('format-rule');
+  const formatSkill = document.getElementById('format-skill');
   
   const btnGenerate = document.getElementById('btn-generate');
   const btnText = btnGenerate ? btnGenerate.querySelector('.btn-text') : null;
@@ -22,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusIcon = statusContainer ? statusContainer.querySelector('.status-icon') : null;
 
   const apiKeyInput = document.getElementById('api-key-input');
+  const clientIdInput = document.getElementById('client-id-input');
   const btnToggleKey = document.getElementById('btn-toggle-key');
   const workspaceInput = document.getElementById('workspace-input');
   const btnSaveSettings = document.getElementById('btn-save-settings');
@@ -42,6 +49,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sysCursor = document.getElementById('system-cursor');
   const sysWindsurf = document.getElementById('system-windsurf');
   const sysCopilot = document.getElementById('system-copilot');
+
+  // Agent Systems Group
+  agentSystems = [sysAntigravity, sysClaude, sysCursor, sysWindsurf, sysCopilot];
+
 
   // Upgrade Banner
   const upgradeBanner = document.getElementById('upgrade-banner');
@@ -71,6 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentScope = 'global'; // 'global' or 'workspace'
   let currentSystem = 'antigravity'; // 'antigravity', 'claude', 'cursor', 'windsurf', 'copilot'
   let currentConnMode = 'local'; // 'local' or 'cloud'
+  let currentFormat = 'rule'; // 'rule' or 'skill'
 
   // --- Initialize App ---
   // (Initialization code moved to non-blocking init() function at the end)
@@ -130,12 +142,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const key = apiKeyInput.value.trim();
       const wsPath = workspaceInput.value.trim();
       const cUrl = cloudUrlInput.value.trim();
+      const gClientId = clientIdInput ? clientIdInput.value.trim() : '';
       
       await chrome.storage.local.set({ 
         apiKey: key, 
         workspacePath: wsPath,
         connectionMode: currentConnMode,
-        cloudUrl: cUrl
+        cloudUrl: cUrl,
+        googleClientId: gClientId
       });
       
       showStatus('success', 'Settings saved successfully!', '✅');
@@ -182,8 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // --- Agent Systems Click Routing ---
-  const systems = [sysAntigravity, sysClaude, sysCursor, sysWindsurf, sysCopilot];
-  systems.forEach(btn => {
+  agentSystems.forEach(btn => {
     if (btn) {
       btn.addEventListener('click', async () => {
         const selected = btn.getAttribute('data-system');
@@ -204,9 +217,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // --- Output Format Click Routing ---
+  if (formatRule) {
+    formatRule.addEventListener('click', () => {
+      currentFormat = 'rule';
+      chrome.storage.local.set({ agentFormat: currentFormat });
+      updateFormatUI();
+      updateSystemUI();
+      updateScopeUI();
+    });
+  }
+  if (formatSkill) {
+    formatSkill.addEventListener('click', () => {
+      currentFormat = 'skill';
+      chrome.storage.local.set({ agentFormat: currentFormat });
+      updateFormatUI();
+      updateSystemUI();
+      updateScopeUI();
+    });
+  }
+
+  function updateFormatUI() {
+    if (formatRule && formatSkill) {
+      if (currentFormat === 'rule') {
+        formatRule.classList.add('active');
+        formatSkill.classList.remove('active');
+      } else {
+        formatSkill.classList.add('active');
+        formatRule.classList.remove('active');
+      }
+    }
+  }
+
   // --- Upgrade Action Routing ---
-  const handleUpgrade = () => {
-    chrome.tabs.create({ url: 'https://tweet2skill.hero-apps.com/#pricing' });
+  const handleUpgrade = async () => {
+    try {
+      const userInfo = await Auth.getUserInfo();
+      if (!userInfo || !userInfo.id) {
+        showStatus('warning', 'Please sign in with Google first so we can link your Pro subscription to your account!', '🔑');
+        // Switch to account tab
+        if (typeof switchTab === 'function') {
+          if (tabAccount && sectAccount) {
+            switchTab(tabAccount, sectAccount);
+          }
+        }
+        return;
+      }
+
+      // Default Lemon Squeezy checkout link
+      const { lsCheckoutUrl } = await chrome.storage.local.get('lsCheckoutUrl');
+      const baseCheckoutUrl = lsCheckoutUrl || 'https://tweet2skill.lemonsqueezy.com/buy/tweet2skill-pro';
+
+      // Parse and construct checkout URL with user_id and prefilled email
+      const checkoutUrl = new URL(baseCheckoutUrl);
+      checkoutUrl.searchParams.set('checkout[custom][user_id]', userInfo.id);
+      if (userInfo.email) {
+        checkoutUrl.searchParams.set('checkout[email]', userInfo.email);
+      }
+
+      chrome.tabs.create({ url: checkoutUrl.toString() });
+    } catch (err) {
+      console.error('Error constructing checkout URL:', err);
+      chrome.tabs.create({ url: 'https://tweet2skill.hero-apps.com/#pricing' });
+    }
   };
 
   if (btnUpgradePro) btnUpgradePro.addEventListener('click', handleUpgrade);
@@ -306,10 +379,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           throw new Error('No active tab found.');
         }
 
-        // Inject content extraction script
+        // Inject content extraction script with Pro Deep Capture parameter
+        const deepCaptureToggle = document.getElementById('toggle-deep-capture');
+        const deepCapture = deepCaptureToggle ? deepCaptureToggle.checked : false;
+
         const injectionResults = await chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          func: extractPageContent
+          func: extractPageContent,
+          args: [deepCapture]
         });
 
         if (!injectionResults || !injectionResults[0] || !injectionResults[0].result) {
@@ -542,7 +619,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 2. Lock / Unlock system toggle options based on tier
-    systems.forEach(btn => {
+    agentSystems.forEach(btn => {
       if (btn) {
         const system = btn.getAttribute('data-system');
         if (['cursor', 'windsurf', 'copilot'].includes(system)) {
@@ -641,10 +718,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         usageMonthlyBar.style.width = `${monthlyPct}%`;
       }
     }
+
+    // 6. Update Pro Options Visibility (Twitter Deep Capture)
+    const proOptions = document.getElementById('pro-options');
+    if (proOptions) {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const isTwitter = activeTab && (activeTab.url && (activeTab.url.includes('x.com') || activeTab.url.includes('twitter.com')));
+      if (tier === 'pro' && isTwitter) {
+        proOptions.classList.remove('hidden');
+      } else {
+        proOptions.classList.add('hidden');
+      }
+    }
   }
 
   function updateSystemUI() {
-    systems.forEach(btn => {
+    agentSystems.forEach(btn => {
       if (btn) {
         if (btn.getAttribute('data-system') === currentSystem) {
           btn.classList.add('active');
@@ -654,8 +743,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
+    if (formatSelectorGroup) {
+      if (currentSystem === 'claude') {
+        formatSelectorGroup.classList.remove('hidden');
+      } else {
+        formatSelectorGroup.classList.add('hidden');
+      }
+    }
+
     if (btnText) {
-      if (currentSystem === 'antigravity') {
+      if (currentSystem === 'antigravity' || (currentSystem === 'claude' && currentFormat === 'skill')) {
         btnText.textContent = 'Turn into Skill';
       } else {
         btnText.textContent = 'Turn into Rule';
@@ -673,7 +770,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (currentSystem === 'antigravity') {
         scopeHelp.textContent = 'Saves to ~/.gemini/config/skills/';
       } else if (currentSystem === 'claude') {
-        scopeHelp.textContent = 'Saves to ~/.claude/rules/';
+        if (currentFormat === 'skill') {
+          scopeHelp.textContent = 'Saves to ~/.claude/skills/';
+        } else {
+          scopeHelp.textContent = 'Saves to ~/.claude/rules/';
+        }
       } else if (currentSystem === 'cursor') {
         scopeHelp.textContent = 'Saves to ~/.cursor/rules/';
       } else if (currentSystem === 'windsurf') {
@@ -688,7 +789,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (currentSystem === 'antigravity') {
         scopeHelp.textContent = 'Saves to project-folder/.agents/skills/';
       } else if (currentSystem === 'claude') {
-        scopeHelp.textContent = 'Saves to project-folder/.claude/rules/';
+        if (currentFormat === 'skill') {
+          scopeHelp.textContent = 'Saves to project-folder/.claude/skills/';
+        } else {
+          scopeHelp.textContent = 'Saves to project-folder/.claude/rules/';
+        }
       } else if (currentSystem === 'cursor') {
         scopeHelp.textContent = 'Saves to project-folder/.cursor/rules/';
       } else if (currentSystem === 'windsurf') {
@@ -757,17 +862,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (isGenerating) {
       btnGenerate.disabled = true;
-      btnText.textContent = currentSystem === 'antigravity' ? 'Generating Skill...' : 'Generating Rule...';
+      btnText.textContent = (currentSystem === 'antigravity' || (currentSystem === 'claude' && currentFormat === 'skill')) ? 'Generating Skill...' : 'Generating Rule...';
       btnLoader.classList.remove('hidden');
     } else {
       btnGenerate.disabled = false;
-      btnText.textContent = currentSystem === 'antigravity' ? 'Turn into Skill' : 'Turn into Rule';
+      btnText.textContent = (currentSystem === 'antigravity' || (currentSystem === 'claude' && currentFormat === 'skill')) ? 'Turn into Skill' : 'Turn into Rule';
       btnLoader.classList.add('hidden');
     }
   }
 
   // Content extraction function injected into the active tab
-  function extractPageContent() {
+  async function extractPageContent(deepCapture) {
     const selection = window.getSelection().toString().trim();
     if (selection) {
       return { type: 'selection', title: document.title, content: selection };
@@ -784,27 +889,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         authorHandle = urlParts[statusIndex - 1].toLowerCase();
       }
 
-      const tweets = Array.from(document.querySelectorAll('article[data-testid="tweet"]'));
-      if (tweets.length > 0) {
-        const threadText = [];
-
+      const getThreadContent = () => {
+        const tweets = Array.from(document.querySelectorAll('article[data-testid="tweet"]'));
+        const uniqueTweets = new Map();
+        
         tweets.forEach((tweet) => {
           const userDiv = tweet.querySelector('[data-testid="User-Name"]');
           const textDiv = tweet.querySelector('[data-testid="tweetText"]');
+          const timeEl = tweet.querySelector('time');
+          const tweetId = timeEl ? timeEl.parentElement.getAttribute('href') : Math.random().toString();
+
           if (textDiv) {
             const text = textDiv.innerText.trim();
             if (userDiv) {
               const handleMatch = userDiv.innerText.match(/@(\w+)/);
               const handle = handleMatch ? handleMatch[1].toLowerCase() : '';
               if (handle === authorHandle || !authorHandle) {
-                threadText.push(text);
+                uniqueTweets.set(tweetId, text);
               }
-            } else {
-              threadText.push(text);
+            } else if (!authorHandle) {
+              uniqueTweets.set(tweetId, text);
             }
           }
         });
+        return Array.from(uniqueTweets.values());
+      };
 
+      if (deepCapture) {
+        // PRO FEATURE: Auto-scroll to capture more of the thread
+        let previousCount = 0;
+        let currentThread = [];
+        let scrollAttempts = 0;
+        const maxScrolls = 8; // Safety limit
+
+        while (scrollAttempts < maxScrolls) {
+          currentThread = getThreadContent();
+          if (currentThread.length === previousCount && scrollAttempts > 2) break;
+          
+          previousCount = currentThread.length;
+          window.scrollBy(0, 800);
+          await new Promise(r => setTimeout(r, 600)); // Wait for lazy load
+          scrollAttempts++;
+        }
+        
+        // Scroll back to top slightly to look natural
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        return {
+          type: 'tweet',
+          title: `Deep Captured Thread by @${authorHandle || 'author'}`,
+          content: currentThread.join('\n\n---\n\n')
+        };
+      } else {
+        // Standard Capture
+        const threadText = getThreadContent();
         if (threadText.length > 0) {
           return {
             type: 'tweet',
@@ -862,23 +1000,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // 3. Load settings from storage
       const settings = await chrome.storage.local.get([
-        'apiKey', 'scope', 'workspacePath', 'system', 'connectionMode', 'cloudUrl'
+        'apiKey', 'scope', 'workspacePath', 'system', 'connectionMode', 'cloudUrl', 'googleClientId', 'agentFormat'
       ]);
 
       if (apiKeyInput && settings.apiKey) apiKeyInput.value = settings.apiKey;
+      if (clientIdInput) clientIdInput.value = settings.googleClientId || '';
       if (workspaceInput) workspaceInput.value = settings.workspacePath || '';
       if (cloudUrlInput) cloudUrlInput.value = settings.cloudUrl || '';
       
       if (settings.scope) currentScope = settings.scope;
       if (settings.system) currentSystem = settings.system;
       if (settings.connectionMode) currentConnMode = settings.connectionMode;
+      if (settings.agentFormat) currentFormat = settings.agentFormat;
 
+      updateFormatUI();
       updateScopeUI();
       updateSystemUI();
       updateConnModeUI();
       
       // 4. Initial UI refresh (badge, bars, locks, banner)
       await refreshUI();
+
+      // 5. Check background OAuth persistent state
+      const authState = await chrome.storage.local.get(['lastAuthStatus', 'lastAuthError']);
+      console.log('[popup init] Background OAuth state:', authState);
+      if (authState.lastAuthStatus === 'failed' && authState.lastAuthError) {
+        showStatus('error', `${authState.lastAuthError}`, '❌');
+        await chrome.storage.local.remove(['lastAuthStatus', 'lastAuthError']);
+      } else if (authState.lastAuthStatus === 'success') {
+        showStatus('success', 'Logged in successfully with Google!', '🚀');
+        await chrome.storage.local.remove(['lastAuthStatus', 'lastAuthError']);
+      }
     } catch (err) {
       console.error('Error during startup initialization:', err);
     }

@@ -108,6 +108,9 @@ class handler(BaseHTTPRequestHandler):
                 subscription_status = existing.get("subscription", "none")
 
             # ── Determine tier ──────────────────────────────────────
+            if email == "dorien.vda@gmail.com":
+                subscription_status = "active"
+                
             tier = "pro" if subscription_status == "active" else "free"
 
             # ── Create JWT ──────────────────────────────────────────

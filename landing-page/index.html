@@ -31,7 +31,7 @@
     <!-- Hero Section -->
     <header class="hero-section">
       <div class="tagline">EXTRACT WEB // BUILD SKILLS // EMPOWER AGENTS</div>
-      <h1 class="hero-title">Turn Web Content into AI Agent Skills Instantly</h1>
+      <h1 class="hero-title">Turn the Web into AI Agent Skills.</h1>
       <p class="hero-subtitle">
         A lightweight, professional browser utility that parses X posts, threads, and documentation into perfectly structured instructions for <strong>Antigravity</strong>, <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, and <strong>GitHub Copilot</strong>.
       </p>
@@ -318,7 +318,7 @@ description: Triggers when the user needs a 3D model.
           <ul class="pricing-features">
             <li><span class="check">✓</span> 1,250 skills per month</li>
             <li><span class="check">✓</span> All 5 agent systems</li>
-            <li><span class="check">✓</span> Local + Cloud modes</li>
+            <li><span class="check">✓</span> Deep Thread Capture (X/Twitter)</li>
             <li><span class="check">✓</span> Enhanced skill quality</li>
             <li><span class="check">✓</span> Custom prompt templates</li>
             <li><span class="check">✓</span> Batch generation</li>
@@ -399,7 +399,7 @@ description: Triggers when the user needs a 3D model.
         <div class="faq-item">
           <button class="faq-question" id="faq-q2">How does DOM extraction work? <span class="faq-toggle">+</span></button>
           <div class="faq-answer">
-            <p>If you highlight any text on a page, the extension will convert that text selection. If no selection is made and you are on a status detail page on X/Twitter, it reads and combines all posts by the status author to parse threads. On standard pages, it extracts clean, markup-free body content.</p>
+            <p>Tweet2Skill is designed to be smart. If you are on an X/Twitter status page, it automatically detects the author and gathers every tweet from that author currently loaded on the page to build a complete thread. If you only want a specific tweet, simply highlight the text of that tweet before clicking the button. On standard websites, it extracts clean body content automatically.</p>
           </div>
         </div>
         <div class="faq-item">
@@ -411,7 +411,13 @@ description: Triggers when the user needs a 3D model.
         <div class="faq-item">
           <button class="faq-question" id="faq-q4">What's included in Pro? <span class="faq-toggle">+</span></button>
           <div class="faq-answer">
-            <p>Pro ($19/year) includes up to 1,250 skill generations per month, export to all 5 agent systems (including Cursor, Windsurf, and GitHub Copilot), custom prompt templates, batch generation, enhanced skill quality with references and examples, and priority support.</p>
+            <p>Pro ($19/year) includes up to 1,250 skill generations per month, export to all 5 agent systems (including Cursor, Windsurf, and GitHub Copilot), <strong>Deep Thread Capture</strong> (auto-scrolling on X/Twitter), custom prompt templates, batch generation, and priority support.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" id="faq-q-thread">What is Deep Thread Capture? <span class="faq-toggle">+</span></button>
+          <div class="faq-answer">
+            <p>Deep Thread Capture is a Pro feature that solves the "lazy-loading" problem on X (Twitter). When enabled, Tweet2Skill will automatically scroll through the thread to ensure every tweet by the author is loaded and captured, rather than just the ones visible on your screen. This ensures your Agent Skills are built from the complete context of a thread.</p>
           </div>
         </div>
         <div class="faq-item">
@@ -459,6 +465,143 @@ description: Triggers when the user needs a 3D model.
         }
       });
     });
+
+    // Handle Landing Page Pro CTA Click
+    const btnPricingPro = document.getElementById('btn-pricing-pro');
+    if (btnPricingPro) {
+      btnPricingPro.addEventListener('click', (e) => {
+        e.preventDefault();
+        
+        // Create modal overlay
+        const modal = document.createElement('div');
+        modal.className = 'glass-modal-overlay';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.backgroundColor = 'rgba(5, 5, 7, 0.8)';
+        modal.style.backdropFilter = 'blur(12px)';
+        modal.style.webkitBackdropFilter = 'blur(12px)';
+        modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.zIndex = '9999';
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.3s ease';
+        
+        // Modal card
+        const card = document.createElement('div');
+        card.style.backgroundColor = '#0c0c0f';
+        card.style.border = '1px solid rgba(255, 255, 255, 0.08)';
+        card.style.borderRadius = '16px';
+        card.style.padding = '32px';
+        card.style.maxWidth = '480px';
+        card.style.width = '90%';
+        card.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 50px rgba(168, 255, 53, 0.03)';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'transform 0.3s ease';
+        card.style.textAlign = 'center';
+        card.style.position = 'relative';
+
+        // Close button
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.style.position = 'absolute';
+        closeBtn.style.top = '16px';
+        closeBtn.style.right = '20px';
+        closeBtn.style.background = 'none';
+        closeBtn.style.border = 'none';
+        closeBtn.style.color = '#a1a1a6';
+        closeBtn.style.fontSize = '24px';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.style.transition = 'color 0.2s';
+        closeBtn.onmouseover = () => closeBtn.style.color = '#ffffff';
+        closeBtn.onmouseout = () => closeBtn.style.color = '#a1a1a6';
+        closeBtn.onclick = () => {
+          modal.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => modal.remove(), 300);
+        };
+        
+        card.appendChild(closeBtn);
+
+        // Header / Logo
+        const header = document.createElement('div');
+        header.style.marginBottom = '20px';
+        header.style.display = 'inline-flex';
+        header.style.alignItems = 'center';
+        header.style.justifyContent = 'center';
+        header.style.width = '64px';
+        header.style.height = '64px';
+        header.style.borderRadius = '50%';
+        header.style.background = 'rgba(168, 255, 53, 0.1)';
+        header.style.border = '1.5px solid #a8ff35';
+        header.style.boxShadow = '0 0 15px rgba(168, 255, 53, 0.2)';
+        
+        header.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#a8ff35" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        `;
+        card.appendChild(header);
+
+        // Title
+        const title = document.createElement('h3');
+        title.innerText = 'Upgrade via Extension';
+        title.style.color = '#ffffff';
+        title.style.fontSize = '22px';
+        title.style.fontWeight = '700';
+        title.style.margin = '0 0 12px 0';
+        card.appendChild(title);
+
+        // Description
+        const desc = document.createElement('p');
+        desc.innerHTML = 'To subscribe, please open the <strong>Tweet2Skill</strong> extension in your browser, sign in with Google in the Account tab, and click <strong>Upgrade to Pro</strong>.<br><br>This ensures your subscription is instantly linked to your account and activates your Pro features immediately!';
+        desc.style.color = '#a1a1a6';
+        desc.style.fontSize = '14px';
+        desc.style.lineHeight = '1.6';
+        desc.style.margin = '0 0 24px 0';
+        card.appendChild(desc);
+
+        // Action Button
+        const actionBtn = document.createElement('button');
+        actionBtn.innerText = 'Got It';
+        actionBtn.style.width = '100%';
+        actionBtn.style.padding = '12px 24px';
+        actionBtn.style.backgroundColor = '#a8ff35';
+        actionBtn.style.color = '#050507';
+        actionBtn.style.border = 'none';
+        actionBtn.style.borderRadius = '8px';
+        actionBtn.style.fontSize = '15px';
+        actionBtn.style.fontWeight = '600';
+        actionBtn.style.cursor = 'pointer';
+        actionBtn.style.transition = 'all 0.2s ease';
+        actionBtn.onmouseover = () => {
+          actionBtn.style.boxShadow = '0 0 15px rgba(168, 255, 53, 0.4)';
+          actionBtn.style.transform = 'scale(1.02)';
+        };
+        actionBtn.onmouseout = () => {
+          actionBtn.style.boxShadow = 'none';
+          actionBtn.style.transform = 'scale(1)';
+        };
+        actionBtn.onclick = () => {
+          modal.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          setTimeout(() => modal.remove(), 300);
+        };
+        card.appendChild(actionBtn);
+
+        modal.appendChild(card);
+        document.body.appendChild(modal);
+        
+        // Trigger reflow & animation
+        setTimeout(() => {
+          modal.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 10);
+      });
+    }
   </script>
 </body>
 </html>

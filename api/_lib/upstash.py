@@ -12,11 +12,21 @@ import urllib.error
 
 
 def _rest_url():
-    return os.environ.get("UPSTASH_REDIS_REST_URL", "")
+    val = os.environ.get("UPSTASH_REDIS_REST_URL", "")
+    # Robustly strip quotes, whitespace, and literal escape newlines (\n)
+    val = val.strip('"').strip("'").strip()
+    if val.endswith("\\n"):
+        val = val[:-2].strip()
+    return val
 
 
 def _rest_token():
-    return os.environ.get("UPSTASH_REDIS_REST_TOKEN", "")
+    val = os.environ.get("UPSTASH_REDIS_REST_TOKEN", "")
+    # Robustly strip quotes, whitespace, and literal escape newlines (\n)
+    val = val.strip('"').strip("'").strip()
+    if val.endswith("\\n"):
+        val = val[:-2].strip()
+    return val
 
 
 def _execute(command_parts):
