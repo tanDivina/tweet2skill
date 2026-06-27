@@ -405,7 +405,19 @@ description: Triggers when the user needs a 3D model.
         <div class="faq-item">
           <button class="faq-question" id="faq-q3">Where do the generated skills go? <span class="faq-toggle">+</span></button>
           <div class="faq-answer">
-            <p>It depends on the agent system. Antigravity skills go to <code>~/.gemini/config/skills/</code>, Claude rules to <code>~/.claude/rules/</code>, Cursor rules to <code>~/.cursor/rules/</code>, Windsurf rules to <code>~/.windsurfrules</code>, and Copilot instructions to <code>~/.github/copilot-instructions.md</code>.</p>
+            <p>It depends on your agent system, format, and save location (Global vs Project-specific):</p>
+            <ul style="margin-left: 20px; padding-left: 0; line-height: 1.6; color: #a1a1a6; margin-top: 8px;">
+              <li><strong>Antigravity Skills</strong>: Global skills go to <code>~/.gemini/config/skills/[slug]/</code>. Project skills go to <code>.agents/skills/[slug]/</code>.</li>
+              <li style="margin-top: 6px;"><strong>Claude Code Rules &amp; Skills</strong>:
+                <ul style="margin-left: 15px; margin-top: 4px;">
+                  <li><em>Rules Format</em>: Saved as <code>~/.claude/rules/[slug].md</code> (Global) or <code>.claude/rules/[slug].md</code> (Project).</li>
+                  <li><em>Skills Format</em>: Saved as a directory containing a <code>SKILL.md</code>: <code>~/.claude/skills/[slug]/SKILL.md</code> (Global) or <code>.claude/skills/[slug]/SKILL.md</code> (Project).</li>
+                </ul>
+              </li>
+              <li style="margin-top: 6px;"><strong>Cursor Rules</strong>: Saved to <code>.cursor/rules/[slug].mdc</code> (Project-scoped).</li>
+              <li style="margin-top: 6px;"><strong>Windsurf Rules</strong>: Saved to <code>.windsurfrules</code> in your project root.</li>
+              <li style="margin-top: 6px;"><strong>GitHub Copilot</strong>: Saved to <code>.github/copilot-instructions.md</code> in your project root.</li>
+            </ul>
           </div>
         </div>
         <div class="faq-item">
