@@ -95,6 +95,7 @@ body {
 
 .brand-logo-svg {
   display: block;
+  stroke: var(--accent);
 }
 
 .brand-title {
@@ -486,7 +487,7 @@ input:focus {
 .toggle-icon {
   width: 14px;
   height: 14px;
-  stroke: currentColor;
+  stroke: var(--accent);
   stroke-width: 2.5;
   fill: none;
   display: inline-block;
@@ -497,8 +498,8 @@ input:focus {
 .eye-icon {
   width: 16px;
   height: 16px;
-  stroke: currentColor;
-  stroke-width: 2;
+  stroke: var(--accent);
+  stroke-width: 2.5;
   fill: none;
   display: block;
 }
@@ -532,7 +533,7 @@ input:focus {
 }
 
 .upgrade-banner-icon {
-  color: #fbbf24;
+  color: var(--accent);
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -630,7 +631,7 @@ input:focus {
 
 .collapsible-chevron {
   transition: transform 0.3s ease;
-  stroke: currentColor;
+  stroke: var(--accent);
   fill: none;
 }
 
