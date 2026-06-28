@@ -144,9 +144,9 @@ body {
 }
 
 .usage-badge.is-pro {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
-  border-color: rgba(251, 191, 36, 0.3);
-  color: var(--gold);
+  background: rgba(168, 255, 53, 0.08);
+  border-color: rgba(168, 255, 53, 0.25);
+  color: var(--accent);
 }
 
 .usage-badge.is-byok {
@@ -326,7 +326,7 @@ body {
 .pro-lock-icon {
   width: 10px;
   height: 10px;
-  color: var(--gold);
+  color: var(--accent);
   flex-shrink: 0;
   opacity: 0.8;
   display: none;
@@ -781,9 +781,9 @@ input:focus {
 }
 
 .tier-badge.tier-pro {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.15));
-  color: var(--gold);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: rgba(168, 255, 53, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(168, 255, 53, 0.2);
 }
 
 .tier-badge.tier-byok {
@@ -886,8 +886,8 @@ input:focus {
 
 .upgrade-pro-btn.is-pro {
   background: var(--secondary);
-  color: var(--gold);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--accent);
+  border: 1px solid rgba(168, 255, 53, 0.3);
   box-shadow: none;
   cursor: default;
   pointer-events: none;
