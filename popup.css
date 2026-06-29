@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 :root {
   --bg-gradient: linear-gradient(180deg, #0a0a0c 0%, #111115 100%);
   --panel-bg: rgba(20, 20, 25, 0.85);
@@ -518,11 +524,13 @@ input:focus {
    ====================================================================== */
 
 .upgrade-banner {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(245, 158, 11, 0.1));
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(168, 255, 53, 0.3) !important;
   border-radius: 8px;
   padding: 14px;
   animation: slideIn 0.3s ease forwards;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
 }
 
 .upgrade-banner-content {
@@ -533,7 +541,7 @@ input:focus {
 }
 
 .upgrade-banner-icon {
-  color: var(--accent);
+  color: #a8ff35 !important;
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -543,11 +551,11 @@ input:focus {
   flex-direction: column;
   gap: 2px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .upgrade-banner-text strong {
-  color: var(--text-primary);
+  color: #ffffff !important;
   font-weight: 700;
 }
 
@@ -556,11 +564,19 @@ input:focus {
   gap: 8px;
 }
 
+/* Base button rotating animation properties */
+@keyframes rotate-glow {
+  to {
+    --angle: 360deg;
+  }
+}
+
 .upgrade-btn-gold {
+  position: relative;
   flex: 1;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #000000;
-  border: none;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: none !important;
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 12px;
@@ -570,11 +586,46 @@ input:focus {
   font-family: var(--font-family);
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  z-index: 1;
+}
+
+/* Rotating glow border pseudo elements */
+.upgrade-btn-gold::before {
+  content: '';
+  position: absolute;
+  top: -1.5px;
+  left: -1.5px;
+  right: -1.5px;
+  bottom: -1.5px;
+  background: conic-gradient(from var(--angle), transparent, #a8ff35, transparent 30%, #a8ff35, transparent 70%);
+  border-radius: 7.5px;
+  z-index: -1;
+  animation: rotate-glow 2s linear infinite;
+}
+
+.upgrade-btn-gold::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: conic-gradient(from var(--angle), transparent, rgba(168, 255, 53, 0.6), transparent 30%, rgba(168, 255, 53, 0.6), transparent 70%);
+  border-radius: 8px;
+  z-index: -2;
+  filter: blur(4px);
+  animation: rotate-glow 2s linear infinite;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 .upgrade-btn-gold:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.upgrade-btn-gold:hover::after {
+  opacity: 1;
+  filter: blur(6px);
 }
 
 .upgrade-btn-secondary {
@@ -856,15 +907,16 @@ input:focus {
 
 /* Upgrade to Pro button */
 .upgrade-pro-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
   padding: 11px 16px;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #000000;
-  border: none;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: none !important;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 700;
@@ -873,12 +925,59 @@ input:focus {
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px var(--gold-glow);
+  z-index: 1;
+}
+
+/* Green Star styling inside the button */
+.upgrade-pro-btn svg {
+  color: #a8ff35 !important;
+  fill: rgba(168, 255, 53, 0.25) !important;
+  stroke: #a8ff35 !important;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* Rotating glow border pseudo elements for Pro button */
+.upgrade-pro-btn::before {
+  content: '';
+  position: absolute;
+  top: -1.5px;
+  left: -1.5px;
+  right: -1.5px;
+  bottom: -1.5px;
+  background: conic-gradient(from var(--angle), transparent, #a8ff35, transparent 30%, #a8ff35, transparent 70%);
+  border-radius: 7.5px;
+  z-index: -1;
+  animation: rotate-glow 2.5s linear infinite;
+}
+
+.upgrade-pro-btn::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: conic-gradient(from var(--angle), transparent, rgba(168, 255, 53, 0.6), transparent 30%, rgba(168, 255, 53, 0.6), transparent 70%);
+  border-radius: 8px;
+  z-index: -2;
+  filter: blur(4px);
+  animation: rotate-glow 2.5s linear infinite;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 .upgrade-pro-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(251, 191, 36, 0.35);
+}
+
+.upgrade-pro-btn:hover::after {
+  opacity: 1;
+  filter: blur(6px);
+}
+
+.upgrade-pro-btn:hover svg {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .upgrade-pro-btn:active {
@@ -886,12 +985,16 @@ input:focus {
 }
 
 .upgrade-pro-btn.is-pro {
-  background: var(--secondary);
-  color: var(--accent);
-  border: 1px solid rgba(168, 255, 53, 0.3);
-  box-shadow: none;
+  background: var(--secondary) !important;
+  color: var(--accent) !important;
+  border: 1px solid rgba(168, 255, 53, 0.3) !important;
+  box-shadow: none !important;
   cursor: default;
   pointer-events: none;
+}
+
+.upgrade-pro-btn.is-pro::before, .upgrade-pro-btn.is-pro::after {
+  display: none !important;
 }
 
 /* Logout Button */

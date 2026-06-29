@@ -611,8 +611,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         usageBadge.className = 'usage-badge is-byok';
         badgeText.textContent = 'BYOK';
       } else {
-        const dailyUsed = (usage && usage.daily && usage.daily.used !== null) ? usage.daily.used : 0;
-        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null) ? usage.daily.limit : 10;
+        const dailyUsed = (usage && usage.daily && usage.daily.used !== null && usage.daily.used !== undefined) ? usage.daily.used : 0;
+        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null && usage.daily.limit !== undefined) ? usage.daily.limit : 10;
         usageBadge.className = 'usage-badge' + (dailyUsed >= dailyLimit - 2 ? ' near-limit' : '');
         badgeText.textContent = `${dailyUsed}/${dailyLimit}`;
       }
@@ -705,16 +705,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         usageMonthlyText.textContent = 'Unlimited';
         usageMonthlyBar.style.width = '100%';
       } else {
-        const dailyUsed = (usage && usage.daily) ? usage.daily.used : 0;
-        const dailyLimit = (usage && usage.daily) ? usage.daily.limit : 10;
+        const dailyUsed = (usage && usage.daily && usage.daily.used !== null && usage.daily.used !== undefined) ? usage.daily.used : 0;
+        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null && usage.daily.limit !== undefined) ? usage.daily.limit : 10;
         usageDailyText.textContent = `${dailyUsed} / ${dailyLimit}`;
-        const dailyPct = Math.min(100, (dailyUsed / dailyLimit) * 100);
+        const dailyPct = dailyLimit > 0 ? Math.min(100, (dailyUsed / dailyLimit) * 100) : 0;
         usageDailyBar.style.width = `${dailyPct}%`;
 
-        const monthlyUsed = (usage && usage.monthly) ? usage.monthly.used : 0;
-        const monthlyLimit = (usage && usage.monthly) ? usage.monthly.limit : 1250;
+        const monthlyUsed = (usage && usage.monthly && usage.monthly.used !== null && usage.monthly.used !== undefined) ? usage.monthly.used : 0;
+        const monthlyLimit = (usage && usage.monthly && usage.monthly.limit !== null && usage.monthly.limit !== undefined) ? usage.monthly.limit : 1250;
         usageMonthlyText.textContent = `${monthlyUsed} / ${monthlyLimit}`;
-        const monthlyPct = Math.min(100, (monthlyUsed / monthlyLimit) * 100);
+        const monthlyPct = monthlyLimit > 0 ? Math.min(100, (monthlyUsed / monthlyLimit) * 100) : 0;
         usageMonthlyBar.style.width = `${monthlyPct}%`;
       }
     }
@@ -928,18 +928,24 @@ document.addEventListener('DOMContentLoaded', async () => {
           
           previousCount = currentThread.length;
           window.scrollBy(0, 800);
+          if (document.documentElement) document.documentElement.scrollTop += 800;
+          if (document.body) document.body.scrollTop += 800;
+          
           await new Promise(r => setTimeout(r, 600)); // Wait for lazy load
           scrollAttempts++;
         }
         
         // Scroll back to top slightly to look natural
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
 
-        return {
-          type: 'tweet',
-          title: `Deep Captured Thread by @${authorHandle || 'author'}`,
-          content: currentThread.join('\n\n---\n\n')
-        };
+        if (currentThread.length > 0) {
+          return {
+            type: 'tweet',
+            title: `Deep Captured Thread by @${authorHandle || 'author'}`,
+            content: currentThread.join('\n\n---\n\n')
+          };
+        }
       } else {
         // Standard Capture
         const threadText = getThreadContent();

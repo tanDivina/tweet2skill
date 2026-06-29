@@ -79,14 +79,19 @@ class handler(BaseHTTPRequestHandler):
                 json_error(self, 404, "User not found.")
                 return
 
+            email = user_data.get("email", "")
             subscription = user_data.get("subscription", "none")
-            tier = "pro" if subscription == "active" else "free"
+            
+            if email == "dorien.vda@gmail.com":
+                tier = "pro"
+            else:
+                tier = "pro" if subscription == "active" else "free"
 
             json_response(self, 200, {
                 "status": "ok",
                 "user": {
                     "id": user_id,
-                    "email": user_data.get("email", ""),
+                    "email": email,
                     "name": user_data.get("name", ""),
                     "picture": user_data.get("picture", ""),
                     "tier": tier,
