@@ -318,11 +318,14 @@
           <div class="toggle-group" id="feedback-category-group">
             <button id="fb-bug" class="toggle-btn active" data-category="bug">
               <svg class="toggle-icon" viewBox="-2 -2 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <!-- Outer circle with white outline and black fill -->
-                <circle cx="12" cy="12" r="10" fill="#000000" stroke="#ffffff" stroke-width="1.8"></circle>
-                <!-- Neon green exclamation point -->
-                <line x1="12" y1="8" x2="12" y2="13" stroke="#a8ff35" stroke-width="2"></line>
-                <circle cx="12" cy="17" r="1" fill="#a8ff35" stroke="#a8ff35" stroke-width="1"></circle>
+                <!-- Bug main body with white outline and black fill -->
+                <rect x="8" y="6" width="8" height="14" rx="4" fill="#000000" stroke="#ffffff" stroke-width="1.8" />
+                <!-- Bug head with white outline and black fill -->
+                <path d="M18 8A4 4 0 0 0 6 8" fill="#000000" stroke="#ffffff" stroke-width="1.8" />
+                <!-- Neon green legs -->
+                <path d="M4 12h16" stroke="#a8ff35" stroke-width="2" />
+                <path d="M4 16h16" stroke="#a8ff35" stroke-width="2" />
+                <path d="M8 10h8" stroke="#a8ff35" stroke-width="2" />
               </svg>
               <span>Bug Report</span>
             </button>
