@@ -28,6 +28,7 @@
         <button id="tab-generator" class="tab-btn active">Linker</button>
         <button id="tab-settings" class="tab-btn">Settings</button>
         <button id="tab-account" class="tab-btn">Account</button>
+        <button id="tab-feedback" class="tab-btn">Feedback</button>
       </nav>
     </header>
 
@@ -307,6 +308,51 @@
           </button>
 
           <button id="btn-logout" class="secondary-btn logout-btn">Log Out</button>
+        </div>
+      </section>
+
+      <!-- Feedback Section -->
+      <section id="sect-feedback" class="content-section">
+        <div class="control-group">
+          <label>Category</label>
+          <div class="toggle-group" id="feedback-category-group">
+            <button id="fb-bug" class="toggle-btn active" data-category="bug">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Bug Report</span>
+            </button>
+            <button id="fb-suggestion" class="toggle-btn" data-category="suggestion">
+              <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.808 13.064a3 3 0 105.112 0H9.444z"></path>
+              </svg>
+              <span>Suggestion</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="feedback-message">Details</label>
+          <textarea id="feedback-message" placeholder="Describe the bug or suggest an improvement..." rows="5" class="feedback-textarea"></textarea>
+        </div>
+
+        <div class="control-group">
+          <label for="feedback-email">Email (Optional)</label>
+          <input type="text" id="feedback-email" placeholder="you@example.com" class="feedback-input">
+        </div>
+
+        <button id="btn-submit-feedback" class="primary-btn">
+          <span class="btn-text">Submit Feedback</span>
+          <div class="btn-loader hidden">
+            <span class="spinner"></span>
+          </div>
+        </button>
+
+        <div id="feedback-status-container" class="status-box hidden">
+          <div class="status-icon"></div>
+          <div class="status-message"></div>
         </div>
       </section>
     </main>

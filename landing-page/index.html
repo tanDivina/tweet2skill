@@ -41,6 +41,13 @@
         <a href="#pricing" class="secondary-btn" id="btn-hero-pricing">See Pricing</a>
       </div>
 
+      <!-- Demo Video Intro -->
+      <div class="video-intro" style="text-align: center; max-width: 680px; margin: 48px auto 16px auto; padding: 0 20px;">
+        <p style="color: var(--text-secondary); font-size: 15px; line-height: 1.6; margin-bottom: 0;">
+          💡 <strong>Watch Tweet2Skill in Action:</strong> See how to capture real-time Twitter/X threads, bypass lazy-loading blocks with Pro Deep Capture, and instantly convert them into perfectly formatted, IDE-ready agent skills.
+        </p>
+      </div>
+
       <!-- Demo Video Showcase -->
       <div class="showcase-container video-showcase-container">
         <div class="mock-window video-window">
@@ -583,5 +590,161 @@
       });
     }
   </script>
+
+  <!-- Floating Feedback Button -->
+  <button id="floating-feedback-btn" class="floating-feedback-btn" title="Send Feedback">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <span>Feedback</span>
+  </button>
+
+  <!-- Sliding Feedback Drawer -->
+  <div id="feedback-drawer" class="feedback-drawer">
+    <div class="feedback-drawer-header">
+      <h3>Submit Feedback</h3>
+      <button id="close-feedback-drawer" class="close-drawer-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="feedback-drawer-body">
+      <div class="web-control-group">
+        <label>Category</label>
+        <div class="web-toggle-group">
+          <button id="web-fb-bug" class="web-toggle-btn active">🐞 Bug Report</button>
+          <button id="web-fb-suggestion" class="web-toggle-btn">💡 Suggestion</button>
+        </div>
+      </div>
+      <div class="web-control-group">
+        <label for="web-feedback-message">Details</label>
+        <textarea id="web-feedback-message" placeholder="Describe the issue or suggest an improvement..." rows="5"></textarea>
+      </div>
+      <div class="web-control-group">
+        <label for="web-feedback-email">Email (Optional)</label>
+        <input type="email" id="web-feedback-email" placeholder="you@example.com">
+      </div>
+      <button id="web-btn-submit-feedback" class="web-submit-btn">
+        <span class="btn-text">Submit Feedback</span>
+        <div class="btn-loader hidden">
+          <span class="spinner"></span>
+        </div>
+      </button>
+      <div id="web-feedback-status" class="web-status-box hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- Website Feedback Drawer Logic ---
+    const feedbackBtn = document.getElementById('floating-feedback-btn');
+    const feedbackDrawer = document.getElementById('feedback-drawer');
+    const closeFeedbackBtn = document.getElementById('close-feedback-drawer');
+    const webFbBug = document.getElementById('web-fb-bug');
+    const webFbSuggestion = document.getElementById('web-fb-suggestion');
+    const webSubmitBtn = document.getElementById('web-btn-submit-feedback');
+    const webMessageInput = document.getElementById('web-feedback-message');
+    const webEmailInput = document.getElementById('web-feedback-email');
+    const webStatusBox = document.getElementById('web-feedback-status');
+
+    let webCategory = 'bug';
+
+    if (feedbackBtn && feedbackDrawer && closeFeedbackBtn) {
+      feedbackBtn.onclick = () => {
+        feedbackDrawer.classList.add('open');
+      };
+      closeFeedbackBtn.onclick = () => {
+        feedbackDrawer.classList.remove('open');
+      };
+    }
+
+    if (webFbBug && webFbSuggestion) {
+      webFbBug.onclick = () => {
+        webFbBug.classList.add('active');
+        webFbSuggestion.classList.remove('active');
+        webCategory = 'bug';
+      };
+      webFbSuggestion.onclick = () => {
+        webFbSuggestion.classList.add('active');
+        webFbBug.classList.remove('active');
+        webCategory = 'suggestion';
+      };
+    }
+
+    if (webSubmitBtn) {
+      webSubmitBtn.onclick = async () => {
+        const message = webMessageInput.value.trim();
+        const email = webEmailInput.value.trim();
+
+        if (!message) {
+          showWebStatus('Please enter feedback details.', 'error');
+          return;
+        }
+
+        setWebSubmitting(true);
+        hideWebStatus();
+
+        try {
+          const payload = {
+            type: webCategory,
+            message: message,
+            email: email || 'Anonymous',
+            context: {
+              source: 'landing-page',
+              tabUrl: window.location.href,
+              userAgent: navigator.userAgent
+            }
+          };
+
+          const response = await fetch('/api/feedback', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (response.ok && result.status === 'ok') {
+            showWebStatus('Feedback submitted successfully! Thank you.', 'success');
+            webMessageInput.value = '';
+          } else {
+            showWebStatus(result.message || 'Failed to submit feedback.', 'error');
+          }
+        } catch (err) {
+          showWebStatus(`Submission failed: ${err.message}`, 'error');
+        } finally {
+          setWebSubmitting(false);
+        }
+      };
+    }
+
+    function setWebSubmitting(submitting) {
+      const btnText = webSubmitBtn.querySelector('.btn-text');
+      const btnLoader = webSubmitBtn.querySelector('.btn-loader');
+      if (submitting) {
+        webSubmitBtn.disabled = true;
+        btnText.textContent = 'Submitting...';
+        if (btnLoader) btnLoader.classList.remove('hidden');
+      } else {
+        webSubmitBtn.disabled = false;
+        btnText.textContent = 'Submit Feedback';
+        if (btnLoader) btnLoader.classList.add('hidden');
+      }
+    }
+
+    function showWebStatus(msg, type) {
+      if (!webStatusBox) return;
+      webStatusBox.textContent = msg;
+      webStatusBox.className = `web-status-box ${type}`;
+      webStatusBox.classList.remove('hidden');
+    }
+
+    function hideWebStatus() {
+      if (webStatusBox) webStatusBox.classList.add('hidden');
+    }
+  </script>
 </body>
 </html>
+

@@ -189,3 +189,9 @@ def incr_with_ttl(key, ttl_seconds):
         _execute(["EXPIRE", key, str(int(ttl_seconds))])
 
     return counter
+
+
+def rpush(key, value):
+    """RPUSH a value onto a list."""
+    return _execute(["RPUSH", key, str(value)])
+

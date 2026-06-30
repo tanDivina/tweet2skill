@@ -5,10 +5,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabGenerator = document.getElementById('tab-generator');
   const tabSettings = document.getElementById('tab-settings');
   const tabAccount = document.getElementById('tab-account');
+  const tabFeedback = document.getElementById('tab-feedback');
 
   const sectGenerator = document.getElementById('sect-generator');
   const sectSettings = document.getElementById('sect-settings');
   const sectAccount = document.getElementById('sect-account');
+  const sectFeedback = document.getElementById('sect-feedback');
 
   const activeUrlSpan = document.getElementById('active-url');
   const scopeGlobal = document.getElementById('scope-global');
@@ -90,20 +92,159 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Tab Navigation ---
   function switchTab(activeTab, activeSect) {
-    [tabGenerator, tabSettings, tabAccount].forEach(t => {
+    [tabGenerator, tabSettings, tabAccount, tabFeedback].forEach(t => {
       if (t) t.classList.remove('active');
     });
-    [sectGenerator, sectSettings, sectAccount].forEach(s => {
+    [sectGenerator, sectSettings, sectAccount, sectFeedback].forEach(s => {
       if (s) s.classList.remove('active');
     });
     if (activeTab) activeTab.classList.add('active');
     if (activeSect) activeSect.classList.add('active');
     hideStatus();
+    hideFeedbackStatus();
   }
 
   if (tabGenerator) tabGenerator.addEventListener('click', () => switchTab(tabGenerator, sectGenerator));
   if (tabSettings) tabSettings.addEventListener('click', () => switchTab(tabSettings, sectSettings));
   if (tabAccount) tabAccount.addEventListener('click', () => switchTab(tabAccount, sectAccount));
+  if (tabFeedback) tabFeedback.addEventListener('click', () => switchTab(tabFeedback, sectFeedback));
+
+  // --- Feedback Functionality ---
+  const btnSubmitFeedback = document.getElementById('btn-submit-feedback');
+  const feedbackMessage = document.getElementById('feedback-message');
+  const feedbackEmail = document.getElementById('feedback-email');
+  const feedbackStatusContainer = document.getElementById('feedback-status-container');
+  const feedbackStatusMsg = feedbackStatusContainer ? feedbackStatusContainer.querySelector('.status-message') : null;
+  const feedbackStatusIcon = feedbackStatusContainer ? feedbackStatusContainer.querySelector('.status-icon') : null;
+  const fbBug = document.getElementById('fb-bug');
+  const fbSuggestion = document.getElementById('fb-suggestion');
+
+  let activeFeedbackCategory = 'bug';
+  if (fbBug && fbSuggestion) {
+    fbBug.addEventListener('click', () => {
+      fbBug.classList.add('active');
+      fbSuggestion.classList.remove('active');
+      activeFeedbackCategory = 'bug';
+    });
+    fbSuggestion.addEventListener('click', () => {
+      fbSuggestion.classList.add('active');
+      fbBug.classList.remove('active');
+      activeFeedbackCategory = 'suggestion';
+    });
+  }
+
+  if (btnSubmitFeedback) {
+    btnSubmitFeedback.addEventListener('click', async () => {
+      const message = feedbackMessage.value.trim();
+      const email = feedbackEmail.value.trim();
+      if (!message) {
+        showFeedbackStatus('Please enter feedback details.', 'error');
+        return;
+      }
+      
+      setFeedbackSubmitting(true);
+      hideFeedbackStatus();
+
+      try {
+        let activeUrl = 'Unknown';
+        try {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tab && tab.url) activeUrl = tab.url;
+        } catch (e) {
+          console.error("Failed to query active tab for feedback context:", e);
+        }
+
+        let finalEmail = email;
+        if (!finalEmail) {
+          try {
+            const authState = await chrome.storage.local.get(['session_email']);
+            if (authState && authState.session_email) {
+              finalEmail = authState.session_email;
+            }
+          } catch (e) {}
+        }
+
+        const settings = await chrome.storage.local.get(['connectionMode', 'cloudUrl']);
+        const mode = settings.connectionMode || 'local';
+        const cloudUrl = settings.cloudUrl || 'https://tweetskill.vercel.app';
+        const apiBase = (mode === 'cloud') ? cloudUrl : 'http://localhost:3000';
+        
+        const payload = {
+          type: activeFeedbackCategory,
+          message: message,
+          email: finalEmail,
+          context: {
+            source: 'chrome-extension',
+            tabUrl: activeUrl,
+            userAgent: navigator.userAgent
+          }
+        };
+
+        const response = await fetch(`${apiBase}/api/feedback`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (response.ok && result.status === 'ok') {
+          showFeedbackStatus('Feedback submitted successfully! Thank you.', 'success');
+          feedbackMessage.value = '';
+        } else {
+          showFeedbackStatus(result.message || 'Failed to submit feedback.', 'error');
+        }
+      } catch (err) {
+        showFeedbackStatus(`Submission failed: ${err.message}`, 'error');
+      } finally {
+        setFeedbackSubmitting(false);
+      }
+    });
+  }
+
+  function setFeedbackSubmitting(submitting) {
+    const btnText = btnSubmitFeedback.querySelector('.btn-text');
+    const btnLoader = btnSubmitFeedback.querySelector('.btn-loader');
+    if (submitting) {
+      btnSubmitFeedback.disabled = true;
+      btnText.textContent = 'Submitting...';
+      btnLoader.classList.remove('hidden');
+    } else {
+      btnSubmitFeedback.disabled = false;
+      btnText.textContent = 'Submit Feedback';
+      btnLoader.classList.add('hidden');
+    }
+  }
+
+  function showFeedbackStatus(msg, type) {
+    if (!feedbackStatusContainer || !feedbackStatusMsg || !feedbackStatusIcon) return;
+    feedbackStatusMsg.textContent = msg;
+    feedbackStatusContainer.className = `status-box ${type}`;
+    
+    let svgIcon = '';
+    if (type === 'success') {
+      svgIcon = `
+        <svg class="status-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      `;
+    } else {
+      svgIcon = `
+        <svg class="status-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      `;
+    }
+    feedbackStatusIcon.innerHTML = svgIcon;
+    feedbackStatusContainer.classList.remove('hidden');
+  }
+
+  function hideFeedbackStatus() {
+    if (feedbackStatusContainer) feedbackStatusContainer.classList.add('hidden');
+  }
 
   // --- BYOK Collapsible ---
   if (byokToggle && byokContent) {

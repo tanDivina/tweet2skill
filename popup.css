@@ -1122,3 +1122,26 @@ input:checked + .slider:before {
   color: var(--text-muted);
   line-height: 1.2;
 }
+
+/* Feedback Specific Styles */
+.feedback-textarea, .feedback-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+}
+.feedback-textarea:focus, .feedback-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+.feedback-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
