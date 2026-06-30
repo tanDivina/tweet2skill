@@ -164,10 +164,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           } catch (e) {}
         }
 
-        const settings = await chrome.storage.local.get(['connectionMode', 'cloudUrl']);
-        const mode = settings.connectionMode || 'local';
-        const cloudUrl = settings.cloudUrl || 'https://tweetskill.vercel.app';
-        const apiBase = (mode === 'cloud') ? cloudUrl : 'http://localhost:3000';
+        // Feedback always goes directly to the live production server so we collect real reports.
+        const apiBase = 'https://tweetskill.vercel.app';
         
         const payload = {
           type: activeFeedbackCategory,
