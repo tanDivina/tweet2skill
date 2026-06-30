@@ -103,7 +103,7 @@ def verify_google_token(id_token: str) -> dict:
     Returns the decoded token payload (sub, email, name, picture, etc.).
     Raises ValueError if the token is invalid or the audience doesn't match.
     """
-    google_client_id = os.environ.get("GOOGLE_CLIENT_ID", "")
+    google_client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
     url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
 
     req = urllib.request.Request(url, method="GET")
