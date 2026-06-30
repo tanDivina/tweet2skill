@@ -61,11 +61,15 @@
   /** Get Google OAuth client ID from storage or use default production fallback */
   async function _getClientId() {
     const { googleClientId } = await chrome.storage.local.get('googleClientId');
-    if (googleClientId === '238463452910-arlikd85im7mak8rkrkqdk51a5g00va6.apps.googleusercontent.com') {
+    const oldIds = [
+      '238463452910-arlikd85im7mak8rkrkqdk51a5g00va6.apps.googleusercontent.com',
+      '951467459639-gq3oefcvs74poea1atgee91u3nh44ni4.apps.googleusercontent.com'
+    ];
+    if (oldIds.includes(googleClientId)) {
       await chrome.storage.local.remove('googleClientId');
-      return '951467459639-gq3oefcvs74poea1atgee91u3nh44ni4.apps.googleusercontent.com';
+      return '951467459639-d4ke3sujtvls1v2tqoluq67tavvsuia8.apps.googleusercontent.com';
     }
-    return googleClientId || '951467459639-gq3oefcvs74poea1atgee91u3nh44ni4.apps.googleusercontent.com';
+    return googleClientId || '951467459639-d4ke3sujtvls1v2tqoluq67tavvsuia8.apps.googleusercontent.com';
   }
 
   // ---------------------------------------------------------------------------
