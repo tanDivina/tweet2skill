@@ -9,7 +9,7 @@ async function getApiBase() {
 
 async function _getClientId() {
   const { googleClientId } = await chrome.storage.local.get('googleClientId');
-  return googleClientId || '238463452910-arlikd85im7mak8rkrkqdk51a5g00va6.apps.googleusercontent.com';
+  return googleClientId || '951467459639-gq3oefcvs74poea1atgee91u3nh44ni4.apps.googleusercontent.com';
 }
 
 function generateNonce(length = 32) {
