@@ -126,16 +126,21 @@ class handler(BaseHTTPRequestHandler):
                     return
 
                 user_key = f"user:{user_id}"
-                print(f"[webhook] Activating Pro subscription for User: {user_id}, Sub: {subscription_id}", file=sys.stderr)
+                mode = data_object.get("mode", "")
 
-                upstash.hset(user_key, "subscription", "active")
-                upstash.hset(user_key, "subscription_id", subscription_id)
+                if mode == "payment" or not subscription_id:
+                    print(f"[webhook] Adding 2500 credits for User: {user_id}", file=sys.stderr)
+                    upstash.hset(user_key, "subscription", "pro")
+                    upstash.hincrby(user_key, "credits", 2500)
+                else:
+                    print(f"[webhook] Activating legacy subscription for User: {user_id}, Sub: {subscription_id}", file=sys.stderr)
+                    upstash.hset(user_key, "subscription", "pro")
+                    upstash.hset(user_key, "subscription_id", subscription_id)
+                    upstash.set(f"sub_to_user:{subscription_id}", user_id)
+
                 upstash.hset(user_key, "stripe_customer_id", customer_id)
                 upstash.hset(user_key, "customer_email", customer_email)
                 upstash.hset(user_key, "subscription_updated", str(int(time.time())))
-
-                # Set reverse mapping: Stripe Subscription ID -> User ID
-                upstash.set(f"sub_to_user:{subscription_id}", user_id)
 
             # ── Handle customer.subscription.updated ─────────────────
             elif event_type == "customer.subscription.updated":
@@ -156,7 +161,7 @@ class handler(BaseHTTPRequestHandler):
 
                 # Map Stripe subscription states to internal states
                 if stripe_status in ("active", "trialing"):
-                    upstash.hset(user_key, "subscription", "active")
+                    upstash.hset(user_key, "subscription", "pro")
                 elif stripe_status in ("past_due", "unpaid", "paused"):
                     upstash.hset(user_key, "subscription", stripe_status)
                 else:

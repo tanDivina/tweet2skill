@@ -117,3 +117,41 @@ def get_monthly_usage(user_id: str) -> int:
     key = f"monthly:{user_id}:{month}"
     val = upstash.get(key)
     return int(val) if val else 0
+
+
+def check_weekly(identifier: str, limit: int = 10) -> dict:
+    """Check weekly rate: max `limit` calls per UTC week.
+
+    Used for free-tier limiting per deviceId AND per IP.
+
+    Args:
+        identifier: unique string (deviceId or IP)
+        limit: weekly cap (default 10)
+
+    Returns:
+        {allowed: bool, remaining: int, limit: int, reset: int}
+    """
+    week = time.strftime("%G-W%V", time.gmtime())
+    key = f"weekly:{identifier}:{week}"
+
+    # 7 days max; auto-expire at end of window
+    count = upstash.incr_with_ttl(key, 86400 * 7)
+    remaining = max(0, limit - count)
+    current_ttl = upstash.ttl(key)
+    reset_at = int(time.time()) + max(current_ttl, 0)
+
+    return {
+        "allowed": count <= limit,
+        "remaining": remaining,
+        "limit": limit,
+        "reset": reset_at,
+    }
+
+
+def get_weekly_usage(identifier: str) -> int:
+    """Get the current weekly usage count for an identifier (no increment)."""
+    week = time.strftime("%G-W%V", time.gmtime())
+    key = f"weekly:{identifier}:{week}"
+    val = upstash.get(key)
+    return int(val) if val else 0
+

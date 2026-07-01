@@ -81,11 +81,16 @@ class handler(BaseHTTPRequestHandler):
 
             email = user_data.get("email", "")
             subscription = user_data.get("subscription", "none")
-            
+            credits_val = 0
+            try:
+                credits_val = int(user_data.get("credits", "0"))
+            except ValueError:
+                pass
+
             if email == "dorien.vda@gmail.com":
                 tier = "pro"
             else:
-                tier = "pro" if subscription == "active" else "free"
+                tier = "pro" if (subscription in ("active", "pro") or credits_val > 0) else "free"
 
             json_response(self, 200, {
                 "status": "ok",
@@ -96,6 +101,7 @@ class handler(BaseHTTPRequestHandler):
                     "picture": user_data.get("picture", ""),
                     "tier": tier,
                     "subscription": subscription,
+                    "credits": credits_val,
                 },
             })
 

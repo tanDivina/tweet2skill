@@ -195,3 +195,15 @@ def rpush(key, value):
     """RPUSH a value onto a list."""
     return _execute(["RPUSH", key, str(value)])
 
+
+def hdel(key, field):
+    """HDEL a hash field."""
+    return _execute(["HDEL", key, field])
+
+
+def hincrby(key, field, increment):
+    """HINCRBY a hash field atomically. Returns the new value as int."""
+    result = _execute(["HINCRBY", key, field, str(int(increment))])
+    return int(result) if result is not None else 0
+
+

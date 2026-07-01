@@ -66,6 +66,8 @@ class handler(BaseHTTPRequestHandler):
             jwt_secret = os.environ.get("JWT_SECRET", "")
             user_id = None
             tier = "free"
+            sub_status = "none"
+            credits_val = 0
 
             if auth_header.startswith("Bearer ") and jwt_secret:
                 token = auth_header[7:].strip()
@@ -76,9 +78,16 @@ class handler(BaseHTTPRequestHandler):
 
                     if email == "dorien.vda@gmail.com":
                         tier = "pro"
+                        sub_status = "active"
                     else:
-                        sub_status = upstash.hget(f"user:{user_id}", "subscription")
-                        if sub_status == "active":
+                        user_data = upstash.hgetall(f"user:{user_id}")
+                        sub_status = user_data.get("subscription", "none")
+                        try:
+                            credits_val = int(user_data.get("credits", "0"))
+                        except ValueError:
+                            credits_val = 0
+
+                        if sub_status in ("active", "pro") or credits_val > 0:
                             tier = "pro"
                         else:
                             tier = "free"
@@ -86,39 +95,57 @@ class handler(BaseHTTPRequestHandler):
                     pass  # Invalid JWT – fall through to free tier
 
             # ── Build usage response ────────────────────────────────
-            daily_limit = 10
-            monthly_limit = 1250
+            daily_limit = 3
+            weekly_limit = 10
             daily_used = 0
-            monthly_used = 0
+            weekly_used = 0
+            legacy_monthly_used = 0
 
             try:
                 if tier == "pro" and user_id:
-                    monthly_used = rate_limiter.get_monthly_usage(user_id)
+                    legacy_monthly_used = rate_limiter.get_monthly_usage(user_id)
                 else:
                     client_ip = auth_utils.get_client_ip(self)
                     identifier = f"dev:{device_id}" if device_id else f"ip:{client_ip}"
                     daily_used = rate_limiter.get_daily_usage(identifier)
-                    free_monthly_id = device_id or client_ip
-                    monthly_used = rate_limiter.get_monthly_usage(f"free:{free_monthly_id}")
+                    weekly_used = rate_limiter.get_weekly_usage(identifier)
             except Exception as e:
                 # Fallback to zeroed usage when Redis is down
                 print(f"[usage] Redis lookup error, falling back to 0: {e}", file=sys.stderr)
 
             if tier == "pro" and user_id:
-                json_response(self, 200, {
+                response_data = {
                     "status": "ok",
                     "tier": "pro",
+                    "subscription": sub_status,
+                    "credits": {
+                        "remaining": credits_val,
+                    },
                     "daily": {
                         "used": None,
                         "limit": None,
                         "remaining": None,
                     },
-                    "monthly": {
-                        "used": monthly_used,
-                        "limit": monthly_limit,
-                        "remaining": max(0, monthly_limit - monthly_used),
+                    "weekly": {
+                        "used": None,
+                        "limit": None,
+                        "remaining": None,
                     },
-                })
+                }
+                # For backward-compatibility with legacy extension installations
+                if sub_status == "active":
+                    response_data["monthly"] = {
+                        "used": legacy_monthly_used,
+                        "limit": 1250,
+                        "remaining": max(0, 1250 - legacy_monthly_used),
+                    }
+                else:
+                    response_data["monthly"] = {
+                        "used": None,
+                        "limit": None,
+                        "remaining": None,
+                    }
+                json_response(self, 200, response_data)
             else:
                 json_response(self, 200, {
                     "status": "ok",
@@ -128,10 +155,15 @@ class handler(BaseHTTPRequestHandler):
                         "limit": daily_limit,
                         "remaining": max(0, daily_limit - daily_used),
                     },
+                    "weekly": {
+                        "used": weekly_used,
+                        "limit": weekly_limit,
+                        "remaining": max(0, weekly_limit - weekly_used),
+                    },
                     "monthly": {
-                        "used": monthly_used,
-                        "limit": monthly_limit,
-                        "remaining": max(0, monthly_limit - monthly_used),
+                        "used": None,
+                        "limit": None,
+                        "remaining": None,
                     },
                 })
 

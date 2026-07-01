@@ -489,11 +489,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       const tier = await Auth.getUserTier();
       const usage = await Auth.fetchUsage();
 
-      // Check daily free limits
-      if (tier === 'free' && usage && usage.daily && usage.daily.used >= usage.daily.limit) {
-        showStatus('error', 'Daily limit reached. Bring your own key in Settings or upgrade to Pro.', '⚠️');
-        if (upgradeBanner) upgradeBanner.classList.remove('hidden');
-        return;
+      // Check daily and weekly free limits
+      if (tier === 'free') {
+        const dailyLimitReached = usage && usage.daily && usage.daily.used >= usage.daily.limit;
+        const weeklyLimitReached = usage && usage.weekly && usage.weekly.used >= usage.weekly.limit;
+        if (dailyLimitReached || weeklyLimitReached) {
+          const reason = dailyLimitReached ? 'Daily free limit reached.' : 'Weekly free limit reached.';
+          showStatus('error', `${reason} Bring your own key in Settings or buy Pro credits.`, '⚠️');
+          if (upgradeBanner) upgradeBanner.classList.remove('hidden');
+          return;
+        }
+      }
+
+      // Check Pro credits limit
+      if (tier === 'pro') {
+        const isLegacyActive = (usage && usage.subscription === 'active');
+        if (!isLegacyActive) {
+          const creditsRemaining = (usage && usage.credits && usage.credits.remaining !== undefined) ? usage.credits.remaining : 0;
+          if (creditsRemaining <= 0) {
+            showStatus('error', 'No credits remaining. Please buy more credits in Settings or add your own API key.', '⚠️');
+            if (upgradeBanner) upgradeBanner.classList.remove('hidden');
+            return;
+          }
+        }
       }
 
       // Check Pro format locks
@@ -751,8 +769,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         badgeText.textContent = 'BYOK';
       } else {
         const dailyUsed = (usage && usage.daily && usage.daily.used !== null && usage.daily.used !== undefined) ? usage.daily.used : 0;
-        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null && usage.daily.limit !== undefined) ? usage.daily.limit : 10;
-        usageBadge.className = 'usage-badge' + (dailyUsed >= dailyLimit - 2 ? ' near-limit' : '');
+        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null && usage.daily.limit !== undefined) ? usage.daily.limit : 3;
+        usageBadge.className = 'usage-badge' + (dailyUsed >= dailyLimit ? ' near-limit' : '');
         badgeText.textContent = `${dailyUsed}/${dailyLimit}`;
       }
     }
@@ -780,10 +798,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // 3. Toggle upgrade banner
+    // 3. Toggle and update upgrade banner
     if (upgradeBanner) {
-      if (tier === 'free' && usage && usage.daily && usage.daily.used >= usage.daily.limit) {
-        upgradeBanner.classList.remove('hidden');
+      const bannerStrong = upgradeBanner.querySelector('.upgrade-banner-text strong');
+      const bannerSpan = upgradeBanner.querySelector('.upgrade-banner-text span');
+      const bannerBtn = document.getElementById('btn-upgrade-banner');
+
+      if (tier === 'free') {
+        const dailyLimitReached = usage && usage.daily && usage.daily.used >= usage.daily.limit;
+        const weeklyLimitReached = usage && usage.weekly && usage.weekly.used >= usage.weekly.limit;
+        if (dailyLimitReached || weeklyLimitReached) {
+          upgradeBanner.classList.remove('hidden');
+          if (bannerStrong) {
+            bannerStrong.textContent = dailyLimitReached ? 'Daily limit reached!' : 'Weekly limit reached!';
+          }
+          if (bannerSpan) {
+            bannerSpan.textContent = 'Upgrade to Pro (2,500 credits) or use your own key';
+          }
+          if (bannerBtn) {
+            bannerBtn.innerHTML = 'Get Credits — $9.99';
+          }
+        } else {
+          upgradeBanner.classList.add('hidden');
+        }
+      } else if (tier === 'pro') {
+        const isLegacyActive = (usage && usage.subscription === 'active');
+        if (!isLegacyActive) {
+          const creditsRemaining = (usage && usage.credits && usage.credits.remaining !== undefined) ? usage.credits.remaining : 0;
+          if (creditsRemaining <= 0) {
+            upgradeBanner.classList.remove('hidden');
+            if (bannerStrong) bannerStrong.textContent = 'Out of credits!';
+            if (bannerSpan) bannerSpan.textContent = 'Buy 2,500 more credits or use your own API key';
+            if (bannerBtn) bannerBtn.innerHTML = 'Buy Credits — $9.99';
+          } else {
+            upgradeBanner.classList.add('hidden');
+          }
+        } else {
+          upgradeBanner.classList.add('hidden');
+        }
       } else {
         upgradeBanner.classList.add('hidden');
       }
@@ -816,10 +868,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (btnUpgradePro) {
+        const upgradeProSpan = btnUpgradePro.querySelector('span');
         if (tier === 'pro') {
-          btnUpgradePro.classList.add('hidden');
+          const isLegacyActive = (usage && usage.subscription === 'active');
+          if (isLegacyActive) {
+            btnUpgradePro.classList.add('hidden');
+          } else {
+            btnUpgradePro.classList.remove('hidden');
+            if (upgradeProSpan) {
+              upgradeProSpan.textContent = 'Buy 2,500 Credits — $9.99';
+            }
+          }
         } else {
           btnUpgradePro.classList.remove('hidden');
+          if (upgradeProSpan) {
+            upgradeProSpan.textContent = 'Upgrade to Pro — $9.99';
+          }
         }
       }
     } else {
@@ -829,32 +893,53 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 5. Update Account Stats & Bars
     if (usageDailyText && usageDailyBar && usageMonthlyText && usageMonthlyBar) {
-      if (tier === 'pro') {
-        usageDailyText.textContent = 'Unlimited';
-        usageDailyBar.style.width = '100%';
+      const usageDailyLabel = document.getElementById('usage-daily-label');
+      const usageMonthlyLabel = document.getElementById('usage-monthly-label');
+      const usageMonthlyRow = document.getElementById('usage-monthly-row');
 
-        const monthlyUsed = (usage && usage.monthly) ? usage.monthly.used : 0;
-        const monthlyLimit = (usage && usage.monthly) ? usage.monthly.limit : 1250;
-        usageMonthlyText.textContent = `${monthlyUsed} / ${monthlyLimit}`;
-        const pct = Math.min(100, (monthlyUsed / monthlyLimit) * 100);
-        usageMonthlyBar.style.width = `${pct}%`;
+      if (tier === 'pro') {
+        const isLegacyActive = (usage && usage.subscription === 'active');
+        
+        if (isLegacyActive) {
+          if (usageDailyLabel) usageDailyLabel.textContent = 'Monthly Usage';
+          const monthlyUsed = (usage && usage.monthly) ? usage.monthly.used : 0;
+          const monthlyLimit = (usage && usage.monthly) ? usage.monthly.limit : 1250;
+          usageDailyText.textContent = `${monthlyUsed} / ${monthlyLimit}`;
+          const pct = Math.min(100, (monthlyUsed / monthlyLimit) * 100);
+          usageDailyBar.style.width = `${pct}%`;
+          
+          if (usageMonthlyRow) usageMonthlyRow.classList.add('hidden');
+        } else {
+          if (usageDailyLabel) usageDailyLabel.textContent = 'Credits Remaining';
+          const creditsRemaining = (usage && usage.credits && usage.credits.remaining !== undefined) ? usage.credits.remaining : 0;
+          usageDailyText.textContent = `${creditsRemaining.toLocaleString()} / 2,500`;
+          const creditPct = Math.min(100, (creditsRemaining / 2500) * 100);
+          usageDailyBar.style.width = `${creditPct}%`;
+          
+          if (usageMonthlyRow) usageMonthlyRow.classList.add('hidden');
+        }
       } else if (tier === 'byok') {
+        if (usageDailyLabel) usageDailyLabel.textContent = 'Daily Usage';
         usageDailyText.textContent = 'Unlimited';
         usageDailyBar.style.width = '100%';
-        usageMonthlyText.textContent = 'Unlimited';
-        usageMonthlyBar.style.width = '100%';
+        
+        if (usageMonthlyRow) usageMonthlyRow.classList.add('hidden');
       } else {
+        if (usageDailyLabel) usageDailyLabel.textContent = 'Daily Usage';
         const dailyUsed = (usage && usage.daily && usage.daily.used !== null && usage.daily.used !== undefined) ? usage.daily.used : 0;
-        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null && usage.daily.limit !== undefined) ? usage.daily.limit : 10;
+        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null && usage.daily.limit !== undefined) ? usage.daily.limit : 3;
         usageDailyText.textContent = `${dailyUsed} / ${dailyLimit}`;
         const dailyPct = dailyLimit > 0 ? Math.min(100, (dailyUsed / dailyLimit) * 100) : 0;
         usageDailyBar.style.width = `${dailyPct}%`;
 
-        const monthlyUsed = (usage && usage.monthly && usage.monthly.used !== null && usage.monthly.used !== undefined) ? usage.monthly.used : 0;
-        const monthlyLimit = (usage && usage.monthly && usage.monthly.limit !== null && usage.monthly.limit !== undefined) ? usage.monthly.limit : 1250;
-        usageMonthlyText.textContent = `${monthlyUsed} / ${monthlyLimit}`;
-        const monthlyPct = monthlyLimit > 0 ? Math.min(100, (monthlyUsed / monthlyLimit) * 100) : 0;
-        usageMonthlyBar.style.width = `${monthlyPct}%`;
+        if (usageMonthlyRow) usageMonthlyRow.classList.remove('hidden');
+        if (usageMonthlyLabel) usageMonthlyLabel.textContent = 'Weekly Usage';
+        
+        const weeklyUsed = (usage && usage.weekly && usage.weekly.used !== null && usage.weekly.used !== undefined) ? usage.weekly.used : 0;
+        const weeklyLimit = (usage && usage.weekly && usage.weekly.limit !== null && usage.weekly.limit !== undefined) ? usage.weekly.limit : 10;
+        usageMonthlyText.textContent = `${weeklyUsed} / ${weeklyLimit}`;
+        const weeklyPct = weeklyLimit > 0 ? Math.min(100, (weeklyUsed / weeklyLimit) * 100) : 0;
+        usageMonthlyBar.style.width = `${weeklyPct}%`;
       }
     }
 

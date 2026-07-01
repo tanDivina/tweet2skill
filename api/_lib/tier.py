@@ -63,10 +63,16 @@ def detect_tier(handler, body: dict = None) -> dict:
                         result["email"] = email
                         return result
 
-                    # Check if user has active subscription in Redis
-                    sub_status = upstash.hget(f"user:{user_id}", "subscription")
+                    # Check if user has active subscription or credits in Redis
+                    user_data = upstash.hgetall(f"user:{user_id}")
+                    sub_status = user_data.get("subscription", "")
+                    credits_val = 0
+                    try:
+                        credits_val = int(user_data.get("credits", "0"))
+                    except ValueError:
+                        pass
 
-                    if sub_status == "active":
+                    if sub_status in ("active", "pro") or credits_val > 0:
                         result["tier"] = "pro"
                         result["userId"] = user_id
                         result["email"] = email

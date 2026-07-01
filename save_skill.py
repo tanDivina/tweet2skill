@@ -170,7 +170,7 @@ def call_proxy_api(content, source_url, agent_system, device_id, auth_token=None
             err_json = json.loads(error_body)
             msg = err_json.get("message", f"HTTP {e.code}")
             if e.code == 429:
-                raise Exception(f"Daily limit reached. Upgrade to Pro ($19/yr) or use your own API key.")
+                raise Exception(f"Daily/weekly limit reached. Buy Pro Credits ($9.99) or use your own API key.")
             raise Exception(f"Proxy API Error: {msg}")
         except json.JSONDecodeError:
             raise Exception(f"Proxy API returned status {e.code}")

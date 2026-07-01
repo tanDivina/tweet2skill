@@ -2,9 +2,9 @@
 /api/generate – Main skill/rule generation endpoint.
 
 Supports three tiers:
-  - free:  Uses server-side GEMINI_API_KEY, 10/day + 1250/month + 3/min burst
+  - free:  Uses server-side GEMINI_API_KEY, 3/day AND 10/week limits, no signup needed
   - byok:  Uses user's own API key, proxied through server, 3/min burst only
-  - pro:   Uses server-side key, 1250/month + 3/min burst, enhanced prompts
+  - pro:   Uses server-side key, consumable credits (2,500 credits), no daily limits
 
 Backward-compatible: requests with apiKey in body and no auth headers → BYOK.
 """
@@ -322,42 +322,87 @@ class handler(BaseHTTPRequestHandler):
                 return
 
             if current_tier == "free":
-                # 5b. Daily limit per deviceId
                 device_id = tier_info["deviceId"]
                 if device_id:
-                    daily_device = rate_limiter.check_daily(f"dev:{device_id}", 10)
+                    # 5b. Daily limit per deviceId (3/day)
+                    daily_device = rate_limiter.check_daily(f"dev:{device_id}", 3)
                     if not daily_device["allowed"]:
                         json_error(
                             self, 429,
-                            f"Daily free limit reached ({daily_device['limit']} skills/day). "
-                            "Add your own API key or upgrade to Pro."
+                            f"Daily free limit reached ({daily_device['limit']} generations/day). "
+                            "Add your own API key or buy credits."
                         )
                         return
 
-                # 5c. Daily limit per IP (anti-abuse)
-                daily_ip = rate_limiter.check_daily(f"ip:{client_ip}", 10)
-                if not daily_ip["allowed"]:
-                    json_error(
-                        self, 429,
-                        f"Daily limit reached for this network ({daily_ip['limit']}/day)."
-                    )
-                    return
+                    # 5c. Weekly limit per deviceId (10/week)
+                    weekly_device = rate_limiter.check_weekly(f"dev:{device_id}", 10)
+                    if not weekly_device["allowed"]:
+                        json_error(
+                            self, 429,
+                            f"Weekly free limit reached ({weekly_device['limit']} generations/week). "
+                            "Add your own API key or buy credits."
+                        )
+                        return
+                else:
+                    # Fallback to IP-only checks
+                    # 5d. Daily limit per IP (3/day)
+                    daily_ip = rate_limiter.check_daily(f"ip:{client_ip}", 3)
+                    if not daily_ip["allowed"]:
+                        json_error(
+                            self, 429,
+                            f"Daily free limit reached for this network ({daily_ip['limit']}/day). "
+                            "Add your own API key or buy credits."
+                        )
+                        return
 
-                # 5d. Monthly cap for free tier
-                free_monthly_id = device_id or client_ip
-                monthly_free = rate_limiter.check_monthly(f"free:{free_monthly_id}", 1250)
-                if not monthly_free["allowed"]:
-                    json_error(self, 429, "Monthly free limit reached. Upgrade to Pro for continued access.")
-                    return
+                    # 5e. Weekly limit per IP (10/week)
+                    weekly_ip = rate_limiter.check_weekly(f"ip:{client_ip}", 10)
+                    if not weekly_ip["allowed"]:
+                        json_error(
+                            self, 429,
+                            f"Weekly free limit reached for this network ({weekly_ip['limit']}/week). "
+                            "Add your own API key or buy credits."
+                        )
+                        return
 
             elif current_tier == "pro":
-                # 5e. Monthly limit for Pro
-                monthly = rate_limiter.check_monthly(tier_info["userId"], 1250)
-                if not monthly["allowed"]:
+                user_id = tier_info["userId"]
+                user_data = upstash.hgetall(f"user:{user_id}")
+                sub_status = user_data.get("subscription", "")
+                
+                is_legacy_sub = (sub_status == "active")
+                credits_val = 0
+                try:
+                    credits_val = int(user_data.get("credits", "0"))
+                except ValueError:
+                    pass
+
+                if is_legacy_sub:
+                    # 5f. Monthly limit for Pro legacy sub
+                    monthly = rate_limiter.check_monthly(user_id, 1250)
+                    if not monthly["allowed"]:
+                        json_error(
+                            self, 429,
+                            f"Monthly Pro limit reached ({monthly['limit']} skills/month). "
+                            "Resets next month."
+                        )
+                        return
+                elif credits_val > 0:
+                    # Deduct credit before API call, refund if Gemini API fails
+                    new_credits = upstash.hincrby(f"user:{user_id}", "credits", -1)
+                    if new_credits < 0:
+                        # Refund and block
+                        upstash.hincrby(f"user:{user_id}", "credits", 1)
+                        json_error(
+                            self, 403,
+                            "No credits remaining. Please buy more credits in settings."
+                        )
+                        return
+                    deducted_credit = True
+                else:
                     json_error(
-                        self, 429,
-                        f"Monthly Pro limit reached ({monthly['limit']} skills/month). "
-                        "Resets next month."
+                        self, 403,
+                        "No credits remaining. Please buy more credits or insert your own API Key."
                     )
                     return
 
@@ -425,4 +470,9 @@ class handler(BaseHTTPRequestHandler):
             json_response(self, 200, response_payload)
 
         except Exception as e:
+            if current_tier == "pro" and 'deducted_credit' in locals() and deducted_credit:
+                try:
+                    upstash.hincrby(f"user:{tier_info['userId']}", "credits", 1)
+                except Exception as refund_err:
+                    print(f"[generate] Failed to refund credit: {refund_err}", file=sys.stderr)
             json_error(self, 500, str(e))

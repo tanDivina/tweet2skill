@@ -108,10 +108,17 @@ class handler(BaseHTTPRequestHandler):
                 subscription_status = existing.get("subscription", "none")
 
             # ── Determine tier ──────────────────────────────────────
+            credits_val = 0
+            if existing:
+                try:
+                    credits_val = int(existing.get("credits", "0"))
+                except ValueError:
+                    pass
+
             if email == "dorien.vda@gmail.com":
                 subscription_status = "active"
                 
-            tier = "pro" if subscription_status == "active" else "free"
+            tier = "pro" if (subscription_status in ("active", "pro") or credits_val > 0) else "free"
 
             # ── Create JWT ──────────────────────────────────────────
             jwt_secret = os.environ.get("JWT_SECRET", "")
@@ -137,6 +144,8 @@ class handler(BaseHTTPRequestHandler):
                     "name": name,
                     "picture": picture,
                     "tier": tier,
+                    "subscription": subscription_status,
+                    "credits": credits_val,
                 },
             })
 
