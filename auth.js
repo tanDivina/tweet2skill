@@ -77,7 +77,7 @@
   // ---------------------------------------------------------------------------
 
   async function logout() {
-    await chrome.storage.local.remove(['authJwt', 'userInfo']);
+    await chrome.storage.local.remove(['authJwt', 'userInfo', 'cachedUsage']);
   }
 
   // ---------------------------------------------------------------------------

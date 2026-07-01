@@ -581,7 +581,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             setGenerating(false);
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError);
-              showStatus('error', `Native Bridge Error: ${chrome.runtime.lastError.message}. Make sure the host is installed.`, '❌');
+              showStatus('error', `
+                <strong>Local Native Bridge Error</strong>: ${chrome.runtime.lastError.message}.<br><br>
+                <strong>How to fix this:</strong><br>
+                1. <strong>Quickest:</strong> Go to <strong>Settings</strong> and switch connection mode to <strong>Cloud Vercel</strong> (uses our high-speed cloud endpoint with zero setup required!).<br>
+                2. <strong>Local Sync:</strong> Open your terminal in the extension folder and run:<br>
+                <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace;">python3 install.py</code>
+              `, '❌');
             } else if (response && response.status === 'done') {
               showStatus('success', response.message.replace(/\n/g, '<br>'), '🚀');
               setTimeout(refreshUI, 1000);
@@ -592,11 +598,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
         } else {
           // Cloud Vercel payload
-          if (!cloudUrl) {
-            throw new Error('Vercel Endpoint URL is missing. Configure it in Settings.');
-          }
+          let apiEndpoint = (cloudUrl && cloudUrl.trim().length > 0) ? cloudUrl.trim() : Auth.DEFAULT_API_BASE;
 
-          let apiEndpoint = cloudUrl.trim();
           if (!apiEndpoint.startsWith('http://') && !apiEndpoint.startsWith('https://')) {
             apiEndpoint = 'https://' + apiEndpoint;
           }
