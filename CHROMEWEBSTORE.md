@@ -1,138 +1,124 @@
 # Chrome Web Store Listing — Tweet2Skill
 
-> Last Updated: 2026-06-25
+> Last Updated: 2026-07-01
 
-## Store Listing
+This document contains the exact, updated copy-pasteable fields required to publish the **Tweet2Skill** Chrome Extension on the Google Chrome Web Store. It has been aligned with the latest 3-tier monetization model and permissions manifest.
 
-**Extension Name** [REQUIRED]
+---
+
+## 1. Store Listing Details
+
+### **Product Name** [Max 45 chars]
+```text
 Tweet2Skill
+```
 
-**Short Description** [REQUIRED]
-Convert X/Twitter tweets, threads, or web pages into Antigravity skills or Claude Code rules instantly.
+### **Short Description** [Max 150 chars]
+```text
+Convert X/Twitter threads, tweets, and webpages into Antigravity skills or Claude Code rules instantly.
+```
 
-**Detailed Description** [REQUIRED]
-Tweet2Skill is the ultimate companion tool for AI-assisted development. With a single click, convert any educational tweet, high-value technical X/Twitter thread, or webpage into production-ready Antigravity (AGY) skills or Claude Code rules. 
+### **Detailed Description** [Max 16,000 chars]
+```text
+Tweet2Skill is the ultimate companion tool for AI-assisted development and pair programming. With a single click, convert any educational tweet, high-value technical X/Twitter thread, or webpage into production-ready Antigravity (AGY) skills, Claude Code rules, or custom system prompts.
 
-Stop struggling to copy-paste scattered advice across your browser tabs. Tweet2Skill parses tweets and website contents instantly, utilizes state-of-the-art AI parsing to generate clean custom developer skills, and saves them directly to your local workspace, cursor configs, or Claude rules folders.
+Stop struggling to copy-paste scattered advice across your browser tabs. Tweet2Skill parses tweets and website contents instantly, utilizes state-of-the-art AI parsing to generate clean developer skills, and saves them directly to your local workspace, Cursor configs, or Claude rules folders.
 
 ### Core Features:
-* **Instant Conversions**: Convert X/Twitter threads or standard web pages into formatted markdown skills (.md files) instantly.
+* **Instant Conversions**: Convert X/Twitter threads or standard web pages into beautifully formatted markdown skills (.md files) instantly.
 * **Workspace Syncing**: Saves files natively into your target workspace's custom agent skill folders.
-* **Advanced Multi-System Support**: Choose from standard Antigravity structures, Claude Code configurations, Cursor settings, Windsurf, or Copilot rules.
+* **Advanced Multi-System Support**: Choose from standard Antigravity structures, Claude Code configurations (.claudecoderc / CLAUDE.md), Cursor settings, Windsurf, or Copilot rules.
 * **Flexible Connections**: Seamlessly switch between zero-config Local mode and secure Cloud Vercel routing.
-* **Bring Your Own Key (BYOK)**: Use your own Gemini API key for unlimited free usage, or access our curated cloud-limit tiers.
+* **Bring Your Own Key (BYOK)**: Use your own Google Gemini API key for unlimited free generation.
+
+### Flexible Tier Structure:
+1. **Free Anonymous Tier**: Get 3 generations per day (up to 10 per week) with zero signups or accounts required. Excellent for quick, casual use!
+2. **Bring Your Own Key (BYOK)**: Connect your own Gemini API key for 100% free, unlimited, and high-performance generations.
+3. **Pro Credits Pack**: A simple, one-time payment of $9.99 for 2,500 permanent cloud credits. No recurring subscriptions, no monthly commitments—just credits that never expire.
 
 ### How to use it:
 1. Navigate to any educational X/Twitter thread or developer documentation page.
-2. Click the Tweet2Skill extension icon.
-3. Choose your target agent system (e.g., Antigravity or Claude Rules).
+2. Click the Tweet2Skill extension icon in your toolbar.
+3. Choose your target agent system (e.g., Antigravity, Claude Rules, Cursor, etc.).
 4. Click "Generate Skill".
 5. Your custom developer skill is parsed, saved, and ready to feed to your autonomous AI agents!
 
 ### Privacy & Security
-Your API keys and workspace directories remain strictly saved inside your browser's local, encrypted storage. We do not sell or monetize your data.
+Your API keys and workspace directories remain strictly saved inside your browser's local, secure, and encrypted storage. We do not sell or monetize your data.
+
+---
+Category: Developer Tools
+```
 
 ---
 
-**Category** [REQUIRED]
-Developer Tools
+## 2. Privacy & Single Purpose
 
-**Single Purpose** [REQUIRED]
+### **Single Purpose Description** [Max 1,000 chars]
+```text
 Convert X/Twitter threads or developer webpages into custom agent skill markdown files (.md) for AI coding environments.
-
-**Primary Language** [REQUIRED]
-English
+```
 
 ---
 
-## Graphics & Assets
+## 3. Permissions Justifications
 
-| Asset | Dimensions | Status | Filename |
-|-------|-----------|--------|----------|
-| Store Icon [REQUIRED] | 128×128 PNG | ✅ Ready | `icons/icon-128.png` |
-| Screenshot 1 [REQUIRED] | 1280×800 or 640×400 | ⬜ Not created | |
-| Screenshot 2 [RECOMMENDED] | 1280×800 or 640×400 | ⬜ Not created | |
-| Screenshot 3 [RECOMMENDED] | 1280×800 or 640×400 | ⬜ Not created | |
-| Small Promo Tile [RECOMMENDED] | 440×280 | ⬜ Not created | |
+Each permission requested in `manifest.json` must be justified for the Chrome Web Store review process. Copy and paste the exact text below for each permission in the developer console:
 
-### Screenshot Notes
-* **Screenshot 1**: Active popup displaying the "Generator" tab on an X/Twitter thread, showcasing the "Generate Skill" button and neon-green dark mode glassmorphism UI.
-* **Screenshot 2**: "Settings" tab displaying the local workspace path configurations and the Advanced collapsible section.
-* **Screenshot 3**: A side-by-side view showing a saved custom skill markdown file imported into Claude Code or Cursor.
+| Permission | Review Console Justification Text |
+| :--- | :--- |
+| **`activeTab`** | Required to read the URL and DOM content of the currently active tab to extract and parse tweets/webpages when the user explicitly clicks the extension action icon. |
+| **`scripting`** | Required to execute a DOM parsing helper script on the active page to extract the full text and structure of educational X/Twitter threads and technical webpages. |
+| **`nativeMessaging`** | Required to securely communicate with the local lightweight Python helper script (`save_skill.py`) to write the generated markdown skill files directly into the user's local workspace directories. |
+| **`storage`** | Required to persist user preferences, connection settings (Local vs Cloud), chosen developer systems, and the user's custom Gemini API key (BYOK mode). |
+| **`tabs`** | Required to access the active tab's metadata (URL and Title) during popup initialization to correctly pre-fill the workspace scope. |
+| **`downloads`** | Used as a reliable fallback download mechanism to let users download skill files directly as browser downloads if they do not want to use the native python helper. |
+| **`identity`** | Required to authenticate the user securely via Google OAuth to verify their email, associate their credit ledger, and track usage quotas. |
 
----
+### Host Permissions
 
-## Permissions Justification
-
-Every permission used in our manifest is strictly scoped to the absolute minimum needed to provide a fluid user experience:
-
-| Permission | Type | Justification |
-|------------|------|---------------|
-| `activeTab` | permissions | Required to read the URL and content of the currently focused tab to perform skill extraction when the user clicks the action icon. |
-| `scripting` | permissions | Required to safely inject a helper DOM parser on the active web page to extract tweet text content. |
-| `nativeMessaging` | permissions | Required to communicate with our secure local python companion script (`save_skill.py`) to write generated skill files directly to the user's project directories. |
-| `storage` | permissions | Required to save settings such as preferred developer systems, connection modes, and local workspace paths. |
-| `tabs` | permissions | Required to extract active tab's metadata (URL and Title) during generator initialization to pre-fill the workspace scope. |
-| `downloads` | permissions | Optional fallback mechanism to let users download skill files directly if they choose to bypass the native helper. |
-| `identity` | permissions | Required to handle Google Sign-In securely using Google OAuth and authenticate usage quotas. |
-| `https://x.com/*` | host_permissions | Allows content parsing on X.com to retrieve developer threads. |
-| `https://twitter.com/*` | host_permissions | Allows content parsing on Twitter.com to retrieve developer threads. |
-| `https://tweet2skill.hero-apps.com/*` | host_permissions | Secure communication with our production web landing page and license portal. |
-| `https://accounts.google.com/*` | host_permissions | Allows secure validation of Google Identity OAuth tokens. |
+| Host Pattern | Justification Text |
+| :--- | :--- |
+| **`https://x.com/*`** | Allows the extension to run and extract text content from modern X.com posts and threads. |
+| **`https://twitter.com/*`** | Allows backward compatibility and text extraction on twitter.com posts and threads. |
+| **`https://tweet2skill.hero-apps.com/*`** | Allows secure communication with the product landing page for user authentication, Stripe integration, and documentation resources. |
+| **`https://accounts.google.com/*`** | Required to securely perform Google OAuth token validation and secure sign-in. |
 
 ---
 
-## Privacy & Data Use
+## 4. Data Usage & Consent Questionnaire
 
-### Data Collection
-* **Does the extension collect user data?** Yes (strictly for quotas/licensing).
+Answer the following questions in the Developer Dashboard exactly as shown below:
 
-| Data Type | Collected? | Transmitted Off-Device? | Purpose | Shared with Third Parties? |
-|-----------|-----------|------------------------|---------|---------------------------|
-| Authentication info | Yes | Yes | Validates login token (ID Token) with Google to verify usage limits. | No |
-| Personally identifiable info | Yes | Yes | Displaying user's email in the Account tab and managing quota. | No |
-| Web history | No | No | N/A | No |
+### 1. Data Collection
+* **Does your extension collect or transmit user data?**
+  * Select: **Yes**
 
-### Data Use Certification
-- [x] Data is NOT sold to third parties
-- [x] Data is NOT used for purposes unrelated to the extension's core functionality
-- [x] Data is NOT used for creditworthiness or lending purposes
+### 2. Specific Data Categories Collected
+* **Personal Communications (e.g., emails)**
+  * **Collected**: Yes
+  * **Off-device storage**: Yes
+  * **Justification**: We collect the user's email address during secure Google Sign-In strictly to identify their account and associate their purchased credits (Pro pack) or track their free daily quotas.
+* **Authentication Information**
+  * **Collected**: Yes
+  * **Off-device storage**: Yes
+  * **Justification**: We process the Google ID Token to authenticate the user securely against our Vercel API and verify their identity before allowing credit-based generations.
+* **Web History**
+  * Select: **No** (The extension does not track history or send URLs off-device except for the specific page being actively parsed when the user clicks 'Generate Skill').
+* **Location**
+  * Select: **No**
+
+### 3. Data Usage Certification
+You must check the following checkboxes to certify your compliance with the CWS Developer Program Policy:
+* [x] **No Selling**: I certify that I will not sell user data to third parties.
+* [x] **No Unrelated Use**: I certify that I will not use user data for purposes unrelated to the extension's core functionality.
+* [x] **No Credit Checks**: I certify that I will not use user data for creditworthiness or lending purposes.
 
 ---
 
-## Privacy Policy
+## 5. Additional Developer Information
 
-**Privacy Policy URL** [REQUIRED]
-`https://tweet2skill.hero-apps.com/privacy`
-
----
-
-## Distribution
-
+* **Privacy Policy URL**: `https://tweet2skill.hero-apps.com/privacy`
+* **Homepage URL**: `https://tweet2skill.hero-apps.com`
+* **Contact Email**: `support@hero-apps.com`
 * **Visibility**: Public
-* **Regions**: All regions
-* **Pricing**: Free to try (freemium limits) with optional Pro upgrade.
-
----
-
-## Developer Info
-
-**Publisher Name** [REQUIRED]
-Hero Apps
-
-**Contact Email** [REQUIRED]
-support@hero-apps.com
-
-**Support URL / Email** [RECOMMENDED]
-support@hero-apps.com
-
-**Homepage URL** [RECOMMENDED]
-`https://tweet2skill.hero-apps.com`
-
----
-
-## Version History
-
-| Version | Date | Changes | Status |
-|---------|------|---------|--------|
-| 1.1.1 | 2026-06-25 | Stabilized extension popup, added direct custom Google OAuth Client ID configurations, and synced directories. | Draft |
