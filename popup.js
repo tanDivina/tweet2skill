@@ -403,15 +403,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Default Lemon Squeezy checkout link
-      const { lsCheckoutUrl } = await chrome.storage.local.get('lsCheckoutUrl');
-      const baseCheckoutUrl = lsCheckoutUrl || 'https://tweet2skill.lemonsqueezy.com/buy/tweet2skill-pro';
+      // Default Stripe checkout link / payment link
+      const { stripeCheckoutUrl } = await chrome.storage.local.get('stripeCheckoutUrl');
+      const baseCheckoutUrl = stripeCheckoutUrl || 'https://buy.stripe.com/test_6oE5mMg4Y0Afe0EaEE'; // Placeholders can be overriden via storage
 
-      // Parse and construct checkout URL with user_id and prefilled email
+      // Construct Stripe payment link URL with prefilled_email and client_reference_id
       const checkoutUrl = new URL(baseCheckoutUrl);
-      checkoutUrl.searchParams.set('checkout[custom][user_id]', userInfo.id);
+      checkoutUrl.searchParams.set('client_reference_id', userInfo.id);
       if (userInfo.email) {
-        checkoutUrl.searchParams.set('checkout[email]', userInfo.email);
+        checkoutUrl.searchParams.set('prefilled_email', userInfo.email);
       }
 
       chrome.tabs.create({ url: checkoutUrl.toString() });

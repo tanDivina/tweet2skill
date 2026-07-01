@@ -1,13 +1,12 @@
 """
-/api/webhook – POST endpoint for Lemon Squeezy payment webhooks.
+/api/webhook – POST endpoint for Stripe payment webhooks.
 
 Handles subscription lifecycle events:
-  - subscription_created  → activate user subscription
-  - subscription_updated  → update subscription status
-  - subscription_cancelled → mark subscription as cancelled (stays active until period end)
-  - subscription_expired   → deactivate subscription
+  - checkout.session.completed  → activate user subscription
+  - customer.subscription.updated  → update subscription status (past_due, active, unpaid, trialing)
+  - customer.subscription.deleted  → deactivate subscription
 
-Webhook signature is verified using HMAC-SHA256 with LEMON_SQUEEZY_WEBHOOK_SECRET.
+Webhook signature is verified using HMAC-SHA256 with STRIPE_WEBHOOK_SECRET.
 """
 
 from http.server import BaseHTTPRequestHandler
@@ -37,18 +36,46 @@ def json_error(handler, status_code, message):
     )
 
 
-def verify_webhook_signature(body_bytes: bytes, signature: str) -> bool:
-    """Verify the Lemon Squeezy webhook HMAC-SHA256 signature."""
-    secret = os.environ.get("LEMON_SQUEEZY_WEBHOOK_SECRET", "")
+def verify_stripe_signature(body_bytes: bytes, signature_header: str) -> bool:
+    """Verify the Stripe webhook HMAC-SHA256 signature."""
+    secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
     if not secret:
-        print("[webhook] WARNING: No webhook secret configured", file=sys.stderr)
+        print("[webhook] WARNING: STRIPE_WEBHOOK_SECRET not configured", file=sys.stderr)
         return False
 
+    if not signature_header:
+        return False
+
+    # Stripe-Signature header format: t=1612345678,v1=abcde12345...
+    parts = {}
+    for item in signature_header.split(","):
+        if "=" in item:
+            k, v = item.split("=", 1)
+            parts[k.strip()] = v.strip()
+
+    t = parts.get("t")
+    v1 = parts.get("v1")
+
+    if not t or not v1:
+        return False
+
+    # Prevent replay attacks by checking timestamp age (limit to 10 minutes)
+    try:
+        age = abs(int(time.time()) - int(t))
+        if age > 600:
+            print(f"[webhook] WARNING: Stripe signature timestamp is expired ({age}s age)", file=sys.stderr)
+            return False
+    except ValueError:
+        return False
+
+    # Construct the signed payload: timestamp + "." + raw_body
+    signed_payload = f"{t}.".encode("utf-8") + body_bytes
+
     expected = hmac.new(
-        secret.encode(), body_bytes, hashlib.sha256
+        secret.encode("utf-8"), signed_payload, hashlib.sha256
     ).hexdigest()
 
-    return hmac.compare_digest(expected, signature)
+    return hmac.compare_digest(expected, v1)
 
 
 class handler(BaseHTTPRequestHandler):
@@ -60,12 +87,12 @@ class handler(BaseHTTPRequestHandler):
             body_bytes = self.rfile.read(content_length)
 
             # ── Verify signature ────────────────────────────────────
-            signature = self.headers.get("X-Signature", "")
+            signature = self.headers.get("Stripe-Signature", "")
             if not signature:
-                signature = self.headers.get("x-signature", "")
+                signature = self.headers.get("stripe-signature", "")
 
-            if not verify_webhook_signature(body_bytes, signature):
-                print("[webhook] Signature verification failed", file=sys.stderr)
+            if not verify_stripe_signature(body_bytes, signature):
+                print("[webhook] Stripe signature verification failed", file=sys.stderr)
                 json_error(self, 401, "Invalid webhook signature.")
                 return
 
@@ -76,86 +103,103 @@ class handler(BaseHTTPRequestHandler):
                 json_error(self, 400, "Malformed JSON payload.")
                 return
 
-            # Lemon Squeezy webhook structure:
-            # {
-            #   "meta": { "event_name": "subscription_created", "custom_data": { "user_id": "..." } },
-            #   "data": { "id": "...", "attributes": { "status": "active", ... } }
-            # }
+            event_type = payload.get("type", "")
+            data_object = payload.get("data", {}).get("object", {})
 
-            meta = payload.get("meta", {})
-            event_name = meta.get("event_name", "")
-            custom_data = meta.get("custom_data", {})
-            user_id = custom_data.get("user_id", "")
+            print(f"[webhook] Received Stripe event: {event_type}", file=sys.stderr)
 
-            data = payload.get("data", {})
-            attributes = data.get("attributes", {})
-            subscription_id = str(data.get("id", ""))
-            ls_status = attributes.get("status", "")
+            # ── Handle checkout.session.completed ───────────────────
+            if event_type == "checkout.session.completed":
+                # client_reference_id contains the user's secure Google user_id
+                user_id = data_object.get("client_reference_id", "")
+                subscription_id = data_object.get("subscription", "")
+                customer_id = data_object.get("customer", "")
+                customer_email = data_object.get("customer_details", {}).get("email", "")
 
-            print(
-                f"[webhook] Event: {event_name}, User: {user_id}, "
-                f"Sub: {subscription_id}, Status: {ls_status}",
-                file=sys.stderr,
-            )
+                if not user_id:
+                    # Fallback check in metadata
+                    user_id = data_object.get("metadata", {}).get("user_id", "")
 
-            if not user_id:
-                # Try to look up user by subscription ID
-                stored_user = upstash.get(f"sub_to_user:{subscription_id}")
-                if stored_user:
-                    user_id = stored_user
-                else:
-                    print(f"[webhook] No user_id for event {event_name}", file=sys.stderr)
-                    # Still return 200 so Lemon Squeezy doesn't retry
-                    json_response(self, 200, {"status": "ok", "message": "No user_id found, event logged."})
+                if not user_id:
+                    print("[webhook] Error: checkout.session.completed has no client_reference_id or user_id", file=sys.stderr)
+                    json_response(self, 200, {"status": "ok", "message": "Logged but ignored due to missing user ID reference."})
                     return
 
-            user_key = f"user:{user_id}"
+                user_key = f"user:{user_id}"
+                print(f"[webhook] Activating Pro subscription for User: {user_id}, Sub: {subscription_id}", file=sys.stderr)
 
-            # ── Handle events ───────────────────────────────────────
-
-            if event_name == "subscription_created":
                 upstash.hset(user_key, "subscription", "active")
                 upstash.hset(user_key, "subscription_id", subscription_id)
+                upstash.hset(user_key, "stripe_customer_id", customer_id)
+                upstash.hset(user_key, "customer_email", customer_email)
                 upstash.hset(user_key, "subscription_updated", str(int(time.time())))
-                # Reverse mapping: subscription → user
+
+                # Set reverse mapping: Stripe Subscription ID -> User ID
                 upstash.set(f"sub_to_user:{subscription_id}", user_id)
 
-            elif event_name == "subscription_updated":
-                # Map Lemon Squeezy statuses to our internal status
-                if ls_status in ("active", "trialing"):
+            # ── Handle customer.subscription.updated ─────────────────
+            elif event_type == "customer.subscription.updated":
+                subscription_id = data_object.get("id", "")
+                stripe_status = data_object.get("status", "")
+                cancel_at_period_end = data_object.get("cancel_at_period_end", False)
+                current_period_end = data_object.get("current_period_end", 0)
+
+                # Look up user by Subscription ID
+                user_id = upstash.get(f"sub_to_user:{subscription_id}")
+                if not user_id:
+                    print(f"[webhook] Info: No user mapped to subscription ID: {subscription_id}", file=sys.stderr)
+                    json_response(self, 200, {"status": "ok", "message": "Ignored subscription update (no mapped user)."})
+                    return
+
+                user_key = f"user:{user_id}"
+                print(f"[webhook] Updating status for User: {user_id}, Sub: {subscription_id} to Stripe state: {stripe_status}", file=sys.stderr)
+
+                # Map Stripe subscription states to internal states
+                if stripe_status in ("active", "trialing"):
                     upstash.hset(user_key, "subscription", "active")
-                elif ls_status in ("past_due", "paused"):
-                    upstash.hset(user_key, "subscription", ls_status)
-                elif ls_status in ("cancelled", "expired", "unpaid"):
-                    upstash.hset(user_key, "subscription", "inactive")
+                elif stripe_status in ("past_due", "unpaid", "paused"):
+                    upstash.hset(user_key, "subscription", stripe_status)
                 else:
-                    upstash.hset(user_key, "subscription", ls_status)
+                    upstash.hset(user_key, "subscription", "inactive")
+
+                if cancel_at_period_end:
+                    upstash.hset(user_key, "subscription_cancels_at", str(current_period_end))
+                else:
+                    upstash.hdel(user_key, "subscription_cancels_at")
 
                 upstash.hset(user_key, "subscription_updated", str(int(time.time())))
 
-            elif event_name == "subscription_cancelled":
-                # Cancelled = still active until period end
-                # Lemon Squeezy sends subscription_expired when it actually ends
-                ends_at = attributes.get("ends_at", "")
-                upstash.hset(user_key, "subscription", "active")  # still active
-                upstash.hset(user_key, "subscription_cancels_at", ends_at)
-                upstash.hset(user_key, "subscription_updated", str(int(time.time())))
+            # ── Handle customer.subscription.deleted ─────────────────
+            elif event_type == "customer.subscription.deleted":
+                subscription_id = data_object.get("id", "")
 
-            elif event_name in ("subscription_expired", "subscription_payment_failed"):
+                user_id = upstash.get(f"sub_to_user:{subscription_id}")
+                if not user_id:
+                    print(f"[webhook] Info: No user mapped to subscription ID: {subscription_id} during cancellation", file=sys.stderr)
+                    json_response(self, 200, {"status": "ok", "message": "Ignored subscription deletion (no mapped user)."})
+                    return
+
+                user_key = f"user:{user_id}"
+                print(f"[webhook] Subscription {subscription_id} deleted. Deactivating user {user_id}", file=sys.stderr)
+
                 upstash.hset(user_key, "subscription", "inactive")
-                upstash.hset(user_key, "subscription_updated", str(int(time.time())))
-
-            elif event_name == "subscription_resumed":
-                upstash.hset(user_key, "subscription", "active")
+                upstash.hdel(user_key, "subscription_cancels_at")
                 upstash.hset(user_key, "subscription_updated", str(int(time.time())))
 
             else:
-                print(f"[webhook] Unhandled event: {event_name}", file=sys.stderr)
+                print(f"[webhook] Event type '{event_type}' not processed.", file=sys.stderr)
 
             json_response(self, 200, {"status": "ok"})
 
         except Exception as e:
-            print(f"[webhook] Error: {e}", file=sys.stderr)
-            # Always return 200 to prevent Lemon Squeezy from retrying on server errors
-            # that aren't transient (better to log and investigate)
-            json_response(self, 200, {"status": "ok", "message": "Event processed with errors."})
+            print(f"[webhook] Unexpected error: {e}", file=sys.stderr)
+            # Always return 200 to Stripe to prevent retrying on permanent/handled errors
+            json_response(self, 200, {"status": "ok", "message": "Processed with errors."})
+
+    def do_OPTIONS(self):
+        """Handle CORS preflight requests gracefully."""
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Stripe-Signature")
+        self.end_headers()
