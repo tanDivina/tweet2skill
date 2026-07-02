@@ -428,6 +428,29 @@
             <p>Yes! Tweet2Skill is open-source. You can clone the repository, run the Python/Vercel backend on your own machine or server, and load the extension unpacked in Chrome. Full setup instructions — including local host mode, native messaging bridge setup, and Vercel deployment — are available in the <a href="https://github.com/tanDivina/TweetSkill" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">GitHub README</a>.</p>
           </div>
         </div>
+        <div class="faq-item">
+          <button class="faq-question" id="faq-q7">What is the difference between Open Source, Local Mode, and Cloud Mode? <span class="faq-toggle">+</span></button>
+          <div class="faq-answer">
+            <p>Here is how the versions and setting modes compare:</p>
+            <ul style="margin-left: 24px; margin-right: 24px; padding-left: 16px; padding-bottom: 12px; line-height: 1.6; color: var(--text-secondary); font-size: 14px; margin-top: 12px;">
+              <li><strong>Open Source (GitHub)</strong>: You clone the repo and load the extension unpacked. You get access to the companion Python scripts. You can run in either Local or Cloud mode, and you bring your own Gemini API key (BYOK) for 100% free, unlimited, and private use.</li>
+              <li style="margin-top: 8px;"><strong>Local Mode (Setting)</strong>: Uses a lightweight background Python script running on your machine (via Native Messaging) to save your generated rules silently and directly into your workspace folders (like <code>.agents/</code> or <code>.claude/</code>) with no browser popups.</li>
+              <li style="margin-top: 8px;"><strong>Cloud Mode (Setting)</strong>: Sends text through a cloud server and triggers a file download in your browser. Standard Chrome Web Store users can use our hosted server with daily free credits or Pro Credits, or enter their own Gemini API key for free, cap-less generations.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" id="faq-q8">Can Chrome Web Store (CWS) or Pro users use Local Mode? <span class="faq-toggle">+</span></button>
+          <div class="faq-answer">
+            <p>Yes, absolutely! Local Mode (silent saving directly to your workspace folders) works perfectly with the Web Store version of the extension and your Pro Credits. To set it up:</p>
+            <ol style="margin-left: 24px; margin-right: 24px; padding-left: 16px; padding-bottom: 12px; line-height: 1.6; color: var(--text-secondary); font-size: 14px; margin-top: 12px;">
+              <li>Download or clone the companion helper files (<code>install.py</code> and <code>save_skill.py</code>) from our public <a href="https://github.com/tanDivina/TweetSkill" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">GitHub Repository</a>.</li>
+              <li style="margin-top: 8px;">Run <code>python3 install.py</code> in your terminal and enter your Web Store Extension ID when prompted. This registers the lightweight background bridge on your system.</li>
+              <li style="margin-top: 8px;">In your Chrome extension settings, switch your connection mode to <strong>Local Host</strong> and specify your active workspace directory path.</li>
+              <li style="margin-top: 8px;">That's it! When you convert a skill, the extension securely passes your logged-in Pro token to your local bridge, utilizing your Pro Credits to generate the skill and saving it directly into your folders.</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </section>
 

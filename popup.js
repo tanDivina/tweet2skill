@@ -688,7 +688,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                   <div style="font-size: 11px; opacity: 0.95; margin-bottom: 6px;">Save the downloaded file exactly to this path:</div>
                   <div style="background: rgba(0,0,0,0.4); padding: 6px; border-radius: 4px; font-family: monospace; font-size: 11px; word-break: break-all; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                     <span style="color: #a8ff35; font-weight: 500;">${targetPath}</span>
-                    <button id="btn-copy-path" style="background: #ffffff; border: none; color: #000000; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; font-family: var(--font-family); font-weight: 700; flex-shrink: 0; transition: all 0.2s;">COPY</button>
+                    <button id="btn-copy-path" style="background: #ffffff; border: none; color: #000000; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; font-family: var(--font-family); font-weight: 700; flex-shrink: 0; transition: all 0.2s;">COPY PATH</button>
+                  </div>
+                  <div style="display: flex; gap: 6px; margin-top: 6px;">
+                    <button id="btn-copy-markdown" style="flex: 1; background: #a8ff35; border: none; color: #000000; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 11px; font-family: var(--font-family); font-weight: 700; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                      <span>📋 COPY SKILL MARKDOWN</span>
+                    </button>
+                  </div>
+                  <div style="font-size: 10px; opacity: 0.8; margin-top: 6px; line-height: 1.3; text-align: left;">
+                    💡 <strong>macOS Tip:</strong> In the Save window, press <code style="background: rgba(255,255,255,0.15); padding: 1px 4px; border-radius: 3px; font-family: monospace;">Cmd+Shift+.</code> to show hidden folders like <code style="background: rgba(255,255,255,0.15); padding: 1px 4px; border-radius: 3px; font-family: monospace;">.agents</code>!
                   </div>
                 `;
                 showStatus('success', htmlContent, '🚀');
@@ -700,8 +708,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     copyBtn.textContent = 'COPIED!';
                     copyBtn.style.background = '#a8ff35';
                     setTimeout(() => { 
-                      copyBtn.textContent = 'COPY'; 
+                      copyBtn.textContent = 'COPY PATH'; 
                       copyBtn.style.background = '#ffffff';
+                    }, 1500);
+                  });
+                }
+
+                const copyMarkdownBtn = document.getElementById('btn-copy-markdown');
+                if (copyMarkdownBtn) {
+                  copyMarkdownBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(resData.markdown);
+                    const btnSpan = copyMarkdownBtn.querySelector('span');
+                    if (btnSpan) btnSpan.textContent = '✓ MARKDOWN COPIED!';
+                    copyMarkdownBtn.style.background = '#7cd315';
+                    setTimeout(() => {
+                      if (btnSpan) btnSpan.textContent = '📋 COPY SKILL MARKDOWN';
+                      copyMarkdownBtn.style.background = '#a8ff35';
                     }, 1500);
                   });
                 }
