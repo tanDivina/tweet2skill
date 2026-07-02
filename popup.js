@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activeTabTitle = '';
   let currentScope = 'global'; // 'global' or 'workspace'
   let currentSystem = 'antigravity'; // 'antigravity', 'claude', 'cursor', 'windsurf', 'copilot'
-  let currentConnMode = 'local'; // 'local' or 'cloud'
+  let currentConnMode = 'cloud'; // 'local' or 'cloud'
   let currentFormat = 'rule'; // 'rule' or 'skill'
 
   // --- Initialize App ---
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       ]);
       
       const wsPath = workspacePath || '';
-      const connMode = connectionMode || 'local';
+      const connMode = connectionMode || 'cloud';
       const tier = await Auth.getUserTier();
       const usage = await Auth.fetchUsage();
 
