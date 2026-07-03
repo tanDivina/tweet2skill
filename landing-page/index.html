@@ -716,6 +716,17 @@
       closeFeedbackBtn.onclick = () => {
         feedbackDrawer.classList.remove('open');
       };
+
+      // Auto-open feedback drawer if URL ends in #feedback
+      const handleHashChange = () => {
+        if (window.location.hash === '#feedback') {
+          feedbackDrawer.classList.add('open');
+        }
+      };
+      window.addEventListener('hashchange', handleHashChange);
+      window.addEventListener('DOMContentLoaded', handleHashChange);
+      // Run immediately in case DOM is already parsed
+      handleHashChange();
     }
 
     if (webFbBug && webFbSuggestion) {

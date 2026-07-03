@@ -6,6 +6,10 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/privacy",
+      "destination": "/landing-page/privacy.html"
+    },
+    {
       "source": "/((?!api/|api$).*)",
       "destination": "/landing-page/$1"
     }
