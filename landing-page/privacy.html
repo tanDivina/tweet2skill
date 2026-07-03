@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Tweet2Skill</title>
+  <meta name="description" content="Privacy Policy for the Tweet2Skill browser utility extension and service.">
+  <link rel="stylesheet" href="index.css?v=1.1.6">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <style>
+    .privacy-container {
+      max-width: 800px;
+      margin: 80px auto;
+      padding: 40px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .privacy-container h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 24px;
+      border-bottom: 1.5px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+    .privacy-container h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+    .privacy-container p, .privacy-container ul {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .privacy-container ul {
+      padding-left: 20px;
+    }
+    .privacy-container li {
+      margin-bottom: 8px;
+    }
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      transition: opacity 0.2s;
+    }
+    .back-home:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="site-container">
+    <!-- Navigation -->
+    <nav class="site-nav">
+      <div class="logo-box" onclick="window.location.href='/'" style="cursor: pointer;">
+        <div class="logo-icon-container">
+          <img class="brand-logo-svg" src="icons/icon.svg" width="22" height="22" alt="Tweet2Skill logo"/>
+        </div>
+        <span class="brand-name">Tweet2Skill</span>
+      </div>
+      <div class="nav-links">
+        <a href="/#features">Features</a>
+        <a href="/#extension">Extension</a>
+        <a href="/#pricing">Pricing</a>
+        <a href="/#setup">Setup</a>
+        <a href="/#faq">FAQ</a>
+      </div>
+    </nav>
+
+    <div class="privacy-container">
+      <a href="/" class="back-home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Home
+      </a>
+      
+      <h1>Privacy Policy</h1>
+      <p>Last updated: July 1, 2026</p>
+      
+      <p>At Tweet2Skill, we respect your privacy and are committed to protecting it. This Privacy Policy explains how we collect, use, and protect your information when you use our browser extension and website.</p>
+
+      <h2>1. Information We Collect</h2>
+      <p>We collect only the minimum necessary data to provide our services:</p>
+      <ul>
+        <li><strong>Email Address and Identity Information</strong>: Collected when you sign in via Google OAuth. This is used solely to verify your subscription/Pro Credits status.</li>
+        <li><strong>Scraped Content</strong>: When you explicitly trigger a generation, the extension scrapes the page structure and sends it to our serverless endpoint to be formatted into markdown. We do not store or keep this scraped content after generation is completed.</li>
+        <li><strong>API Credentials (Optional)</strong>: If you use Bring Your Own Key (BYOK) mode, your Gemini API key is stored securely in your browser's local storage and is never sent to our servers.</li>
+      </ul>
+
+      <h2>2. Data Usage</h2>
+      <p>We certify that:</p>
+      <ul>
+        <li>We do not sell user data to third parties.</li>
+        <li>We do not use user data for any purposes unrelated to the core functionality of generating developer instructions.</li>
+        <li>We do not store your browsing history or track your activity.</li>
+      </ul>
+
+      <h2>3. Third-Party Services</h2>
+      <p>We use the following third-party integrations:</p>
+      <ul>
+        <li><strong>Google API Services</strong>: For OAuth authentication and AI generation.</li>
+        <li><strong>Stripe</strong>: For processing one-time Pro purchases securely. No billing details ever touch our servers.</li>
+      </ul>
+
+      <h2>4. Contact Us</h2>
+      <p>If you have any questions regarding this Privacy Policy, feel free to contact us at <strong>support@hero-apps.com</strong>.</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <p>&copy; 2026 Tweet2Skill. Created by <a href="https://x.com/dorienvibecodes" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">@dorienvibecodes</a>.</p>
+    </footer>
+  </div>
+</body>
+</html>
