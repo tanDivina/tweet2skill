@@ -1,17 +1,25 @@
+var agentSystems = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
   // --- UI Elements ---
   const tabGenerator = document.getElementById('tab-generator');
   const tabSettings = document.getElementById('tab-settings');
   const tabAccount = document.getElementById('tab-account');
+  const tabFeedback = document.getElementById('tab-feedback');
 
   const sectGenerator = document.getElementById('sect-generator');
   const sectSettings = document.getElementById('sect-settings');
   const sectAccount = document.getElementById('sect-account');
+  const sectFeedback = document.getElementById('sect-feedback');
 
   const activeUrlSpan = document.getElementById('active-url');
   const scopeGlobal = document.getElementById('scope-global');
   const scopeWorkspace = document.getElementById('scope-workspace');
   const scopeHelp = document.getElementById('scope-help');
+
+  const formatSelectorGroup = document.getElementById('format-selector-group');
+  const formatRule = document.getElementById('format-rule');
+  const formatSkill = document.getElementById('format-skill');
   
   const btnGenerate = document.getElementById('btn-generate');
   const btnText = btnGenerate ? btnGenerate.querySelector('.btn-text') : null;
@@ -22,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusIcon = statusContainer ? statusContainer.querySelector('.status-icon') : null;
 
   const apiKeyInput = document.getElementById('api-key-input');
+  const clientIdInput = document.getElementById('client-id-input');
   const btnToggleKey = document.getElementById('btn-toggle-key');
   const workspaceInput = document.getElementById('workspace-input');
   const btnSaveSettings = document.getElementById('btn-save-settings');
@@ -42,6 +51,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sysCursor = document.getElementById('system-cursor');
   const sysWindsurf = document.getElementById('system-windsurf');
   const sysCopilot = document.getElementById('system-copilot');
+
+  // Agent Systems Group
+  agentSystems = [sysAntigravity, sysClaude, sysCursor, sysWindsurf, sysCopilot];
+
 
   // Upgrade Banner
   const upgradeBanner = document.getElementById('upgrade-banner');
@@ -70,7 +83,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activeTabTitle = '';
   let currentScope = 'global'; // 'global' or 'workspace'
   let currentSystem = 'antigravity'; // 'antigravity', 'claude', 'cursor', 'windsurf', 'copilot'
-  let currentConnMode = 'local'; // 'local' or 'cloud'
+  let currentConnMode = 'cloud'; // 'local' or 'cloud'
+  let currentFormat = 'rule'; // 'rule' or 'skill'
 
   // --- Initialize App ---
   // (Initialization code moved to non-blocking init() function at the end)
@@ -78,20 +92,157 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Tab Navigation ---
   function switchTab(activeTab, activeSect) {
-    [tabGenerator, tabSettings, tabAccount].forEach(t => {
+    [tabGenerator, tabSettings, tabAccount, tabFeedback].forEach(t => {
       if (t) t.classList.remove('active');
     });
-    [sectGenerator, sectSettings, sectAccount].forEach(s => {
+    [sectGenerator, sectSettings, sectAccount, sectFeedback].forEach(s => {
       if (s) s.classList.remove('active');
     });
     if (activeTab) activeTab.classList.add('active');
     if (activeSect) activeSect.classList.add('active');
     hideStatus();
+    hideFeedbackStatus();
   }
 
   if (tabGenerator) tabGenerator.addEventListener('click', () => switchTab(tabGenerator, sectGenerator));
   if (tabSettings) tabSettings.addEventListener('click', () => switchTab(tabSettings, sectSettings));
   if (tabAccount) tabAccount.addEventListener('click', () => switchTab(tabAccount, sectAccount));
+  if (tabFeedback) tabFeedback.addEventListener('click', () => switchTab(tabFeedback, sectFeedback));
+
+  // --- Feedback Functionality ---
+  const btnSubmitFeedback = document.getElementById('btn-submit-feedback');
+  const feedbackMessage = document.getElementById('feedback-message');
+  const feedbackEmail = document.getElementById('feedback-email');
+  const feedbackStatusContainer = document.getElementById('feedback-status-container');
+  const feedbackStatusMsg = feedbackStatusContainer ? feedbackStatusContainer.querySelector('.status-message') : null;
+  const feedbackStatusIcon = feedbackStatusContainer ? feedbackStatusContainer.querySelector('.status-icon') : null;
+  const fbBug = document.getElementById('fb-bug');
+  const fbSuggestion = document.getElementById('fb-suggestion');
+
+  let activeFeedbackCategory = 'bug';
+  if (fbBug && fbSuggestion) {
+    fbBug.addEventListener('click', () => {
+      fbBug.classList.add('active');
+      fbSuggestion.classList.remove('active');
+      activeFeedbackCategory = 'bug';
+    });
+    fbSuggestion.addEventListener('click', () => {
+      fbSuggestion.classList.add('active');
+      fbBug.classList.remove('active');
+      activeFeedbackCategory = 'suggestion';
+    });
+  }
+
+  if (btnSubmitFeedback) {
+    btnSubmitFeedback.addEventListener('click', async () => {
+      const message = feedbackMessage.value.trim();
+      const email = feedbackEmail.value.trim();
+      if (!message) {
+        showFeedbackStatus('Please enter feedback details.', 'error');
+        return;
+      }
+      
+      setFeedbackSubmitting(true);
+      hideFeedbackStatus();
+
+      try {
+        let activeUrl = 'Unknown';
+        try {
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tab && tab.url) activeUrl = tab.url;
+        } catch (e) {
+          console.error("Failed to query active tab for feedback context:", e);
+        }
+
+        let finalEmail = email;
+        if (!finalEmail) {
+          try {
+            const authState = await chrome.storage.local.get(['session_email']);
+            if (authState && authState.session_email) {
+              finalEmail = authState.session_email;
+            }
+          } catch (e) {}
+        }
+
+        // Feedback always goes directly to the live production server so we collect real reports.
+        const apiBase = 'https://tweetskill.vercel.app';
+        
+        const payload = {
+          type: activeFeedbackCategory,
+          message: message,
+          email: finalEmail,
+          context: {
+            source: 'chrome-extension',
+            tabUrl: activeUrl,
+            userAgent: navigator.userAgent
+          }
+        };
+
+        const response = await fetch(`${apiBase}/api/feedback`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        if (response.ok && result.status === 'ok') {
+          showFeedbackStatus('Feedback submitted successfully! Thank you.', 'success');
+          feedbackMessage.value = '';
+        } else {
+          showFeedbackStatus(result.message || 'Failed to submit feedback.', 'error');
+        }
+      } catch (err) {
+        showFeedbackStatus(`Submission failed: ${err.message}`, 'error');
+      } finally {
+        setFeedbackSubmitting(false);
+      }
+    });
+  }
+
+  function setFeedbackSubmitting(submitting) {
+    const btnText = btnSubmitFeedback.querySelector('.btn-text');
+    const btnLoader = btnSubmitFeedback.querySelector('.btn-loader');
+    if (submitting) {
+      btnSubmitFeedback.disabled = true;
+      btnText.textContent = 'Submitting...';
+      btnLoader.classList.remove('hidden');
+    } else {
+      btnSubmitFeedback.disabled = false;
+      btnText.textContent = 'Submit Feedback';
+      btnLoader.classList.add('hidden');
+    }
+  }
+
+  function showFeedbackStatus(msg, type) {
+    if (!feedbackStatusContainer || !feedbackStatusMsg || !feedbackStatusIcon) return;
+    feedbackStatusMsg.textContent = msg;
+    feedbackStatusContainer.className = `status-box ${type}`;
+    
+    let svgIcon = '';
+    if (type === 'success') {
+      svgIcon = `
+        <svg class="status-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      `;
+    } else {
+      svgIcon = `
+        <svg class="status-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      `;
+    }
+    feedbackStatusIcon.innerHTML = svgIcon;
+    feedbackStatusContainer.classList.remove('hidden');
+  }
+
+  function hideFeedbackStatus() {
+    if (feedbackStatusContainer) feedbackStatusContainer.classList.add('hidden');
+  }
 
   // --- BYOK Collapsible ---
   if (byokToggle && byokContent) {
@@ -130,12 +281,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const key = apiKeyInput.value.trim();
       const wsPath = workspaceInput.value.trim();
       const cUrl = cloudUrlInput.value.trim();
+      const gClientId = clientIdInput ? clientIdInput.value.trim() : '';
       
       await chrome.storage.local.set({ 
         apiKey: key, 
         workspacePath: wsPath,
         connectionMode: currentConnMode,
-        cloudUrl: cUrl
+        cloudUrl: cUrl,
+        googleClientId: gClientId
       });
       
       showStatus('success', 'Settings saved successfully!', '✅');
@@ -182,8 +335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // --- Agent Systems Click Routing ---
-  const systems = [sysAntigravity, sysClaude, sysCursor, sysWindsurf, sysCopilot];
-  systems.forEach(btn => {
+  agentSystems.forEach(btn => {
     if (btn) {
       btn.addEventListener('click', async () => {
         const selected = btn.getAttribute('data-system');
@@ -204,9 +356,69 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // --- Output Format Click Routing ---
+  if (formatRule) {
+    formatRule.addEventListener('click', () => {
+      currentFormat = 'rule';
+      chrome.storage.local.set({ agentFormat: currentFormat });
+      updateFormatUI();
+      updateSystemUI();
+      updateScopeUI();
+    });
+  }
+  if (formatSkill) {
+    formatSkill.addEventListener('click', () => {
+      currentFormat = 'skill';
+      chrome.storage.local.set({ agentFormat: currentFormat });
+      updateFormatUI();
+      updateSystemUI();
+      updateScopeUI();
+    });
+  }
+
+  function updateFormatUI() {
+    if (formatRule && formatSkill) {
+      if (currentFormat === 'rule') {
+        formatRule.classList.add('active');
+        formatSkill.classList.remove('active');
+      } else {
+        formatSkill.classList.add('active');
+        formatRule.classList.remove('active');
+      }
+    }
+  }
+
   // --- Upgrade Action Routing ---
-  const handleUpgrade = () => {
-    chrome.tabs.create({ url: 'https://tweet2skill.hero-apps.com/#pricing' });
+  const handleUpgrade = async () => {
+    try {
+      const userInfo = await Auth.getUserInfo();
+      if (!userInfo || !userInfo.id) {
+        showStatus('warning', 'Please sign in with Google first so we can link your Pro subscription to your account!', '🔑');
+        // Switch to account tab
+        if (typeof switchTab === 'function') {
+          if (tabAccount && sectAccount) {
+            switchTab(tabAccount, sectAccount);
+          }
+        }
+        return;
+      }
+
+      // Default Stripe checkout link / payment link
+      const { stripeCheckoutUrl } = await chrome.storage.local.get('stripeCheckoutUrl');
+      const baseCheckoutUrl = stripeCheckoutUrl || 'https://buy.stripe.com/test_6oE5mMg4Y0Afe0EaEE'; // Placeholders can be overriden via storage
+
+      // Construct Stripe payment link URL with prefilled_email and client_reference_id
+      const checkoutUrl = new URL(baseCheckoutUrl);
+      checkoutUrl.searchParams.set('client_reference_id', userInfo.id);
+      if (userInfo.email) {
+        checkoutUrl.searchParams.set('prefilled_email', userInfo.email);
+      }
+
+      chrome.tabs.create({ url: checkoutUrl.toString() });
+    } catch (err) {
+      console.error('Error constructing checkout URL:', err);
+      chrome.tabs.create({ url: 'https://tweet2skill.hero-apps.com/#pricing' });
+    }
   };
 
   if (btnUpgradePro) btnUpgradePro.addEventListener('click', handleUpgrade);
@@ -273,15 +485,33 @@ document.addEventListener('DOMContentLoaded', async () => {
       ]);
       
       const wsPath = workspacePath || '';
-      const connMode = connectionMode || 'local';
+      const connMode = connectionMode || 'cloud';
       const tier = await Auth.getUserTier();
       const usage = await Auth.fetchUsage();
 
-      // Check daily free limits
-      if (tier === 'free' && usage && usage.daily && usage.daily.used >= usage.daily.limit) {
-        showStatus('error', 'Daily limit reached. Bring your own key in Settings or upgrade to Pro.', '⚠️');
-        if (upgradeBanner) upgradeBanner.classList.remove('hidden');
-        return;
+      // Check daily and weekly free limits
+      if (tier === 'free') {
+        const dailyLimitReached = usage && usage.daily && usage.daily.used >= usage.daily.limit;
+        const weeklyLimitReached = usage && usage.weekly && usage.weekly.used >= usage.weekly.limit;
+        if (dailyLimitReached || weeklyLimitReached) {
+          const reason = dailyLimitReached ? 'Daily free limit reached.' : 'Weekly free limit reached.';
+          showStatus('error', `${reason} Bring your own key in Settings or buy Pro credits.`, '⚠️');
+          if (upgradeBanner) upgradeBanner.classList.remove('hidden');
+          return;
+        }
+      }
+
+      // Check Pro credits limit
+      if (tier === 'pro') {
+        const isLegacyActive = (usage && usage.subscription === 'active');
+        if (!isLegacyActive) {
+          const creditsRemaining = (usage && usage.credits && usage.credits.remaining !== undefined) ? usage.credits.remaining : 0;
+          if (creditsRemaining <= 0) {
+            showStatus('error', 'No credits remaining. Please buy more credits in Settings or add your own API key.', '⚠️');
+            if (upgradeBanner) upgradeBanner.classList.remove('hidden');
+            return;
+          }
+        }
       }
 
       // Check Pro format locks
@@ -306,10 +536,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           throw new Error('No active tab found.');
         }
 
-        // Inject content extraction script
+        // Inject content extraction script with Pro Deep Capture parameter
+        const deepCaptureToggle = document.getElementById('toggle-deep-capture');
+        const deepCapture = deepCaptureToggle ? deepCaptureToggle.checked : false;
+
         const injectionResults = await chrome.scripting.executeScript({
           target: { tabId: tab.id },
-          func: extractPageContent
+          func: extractPageContent,
+          args: [deepCapture]
         });
 
         if (!injectionResults || !injectionResults[0] || !injectionResults[0].result) {
@@ -347,7 +581,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             setGenerating(false);
             if (chrome.runtime.lastError) {
               console.error(chrome.runtime.lastError);
-              showStatus('error', `Native Bridge Error: ${chrome.runtime.lastError.message}. Make sure the host is installed.`, '❌');
+              showStatus('error', `
+                <strong>Local Native Bridge Error</strong>: ${chrome.runtime.lastError.message}.<br><br>
+                <strong>How to fix this:</strong><br>
+                1. <strong>Quickest:</strong> Go to <strong>Settings</strong> and switch connection mode to <strong>Cloud Vercel</strong> (uses our high-speed cloud endpoint with zero setup required!).<br>
+                2. <strong>Local Sync:</strong> Open your terminal in the extension folder and run:<br>
+                <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace;">python3 install.py</code>
+              `, '❌');
             } else if (response && response.status === 'done') {
               showStatus('success', response.message.replace(/\n/g, '<br>'), '🚀');
               setTimeout(refreshUI, 1000);
@@ -358,11 +598,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
         } else {
           // Cloud Vercel payload
-          if (!cloudUrl) {
-            throw new Error('Vercel Endpoint URL is missing. Configure it in Settings.');
-          }
+          let apiEndpoint = (cloudUrl && cloudUrl.trim().length > 0) ? cloudUrl.trim() : Auth.DEFAULT_API_BASE;
 
-          let apiEndpoint = cloudUrl.trim();
           if (!apiEndpoint.startsWith('http://') && !apiEndpoint.startsWith('https://')) {
             apiEndpoint = 'https://' + apiEndpoint;
           }
@@ -451,7 +688,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                   <div style="font-size: 11px; opacity: 0.95; margin-bottom: 6px;">Save the downloaded file exactly to this path:</div>
                   <div style="background: rgba(0,0,0,0.4); padding: 6px; border-radius: 4px; font-family: monospace; font-size: 11px; word-break: break-all; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                     <span style="color: #a8ff35; font-weight: 500;">${targetPath}</span>
-                    <button id="btn-copy-path" style="background: #ffffff; border: none; color: #000000; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; font-family: var(--font-family); font-weight: 700; flex-shrink: 0; transition: all 0.2s;">COPY</button>
+                    <button id="btn-copy-path" style="background: #ffffff; border: none; color: #000000; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; font-family: var(--font-family); font-weight: 700; flex-shrink: 0; transition: all 0.2s;">COPY PATH</button>
+                  </div>
+                  <div style="display: flex; gap: 6px; margin-top: 6px;">
+                    <button id="btn-copy-markdown" style="flex: 1; background: #a8ff35; border: none; color: #000000; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 11px; font-family: var(--font-family); font-weight: 700; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                      <span>📋 COPY SKILL MARKDOWN</span>
+                    </button>
+                  </div>
+                  <div style="font-size: 10px; opacity: 0.8; margin-top: 6px; line-height: 1.3; text-align: left;">
+                    💡 <strong>macOS Tip:</strong> In the Save window, press <code style="background: rgba(255,255,255,0.15); padding: 1px 4px; border-radius: 3px; font-family: monospace;">Cmd+Shift+.</code> to show hidden folders like <code style="background: rgba(255,255,255,0.15); padding: 1px 4px; border-radius: 3px; font-family: monospace;">.agents</code>!
                   </div>
                 `;
                 showStatus('success', htmlContent, '🚀');
@@ -463,8 +708,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     copyBtn.textContent = 'COPIED!';
                     copyBtn.style.background = '#a8ff35';
                     setTimeout(() => { 
-                      copyBtn.textContent = 'COPY'; 
+                      copyBtn.textContent = 'COPY PATH'; 
                       copyBtn.style.background = '#ffffff';
+                    }, 1500);
+                  });
+                }
+
+                const copyMarkdownBtn = document.getElementById('btn-copy-markdown');
+                if (copyMarkdownBtn) {
+                  copyMarkdownBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(resData.markdown);
+                    const btnSpan = copyMarkdownBtn.querySelector('span');
+                    if (btnSpan) btnSpan.textContent = '✓ MARKDOWN COPIED!';
+                    copyMarkdownBtn.style.background = '#7cd315';
+                    setTimeout(() => {
+                      if (btnSpan) btnSpan.textContent = '📋 COPY SKILL MARKDOWN';
+                      copyMarkdownBtn.style.background = '#a8ff35';
                     }, 1500);
                   });
                 }
@@ -534,15 +793,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         usageBadge.className = 'usage-badge is-byok';
         badgeText.textContent = 'BYOK';
       } else {
-        const dailyUsed = (usage && usage.daily && usage.daily.used !== null) ? usage.daily.used : 0;
-        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null) ? usage.daily.limit : 10;
-        usageBadge.className = 'usage-badge' + (dailyUsed >= dailyLimit - 2 ? ' near-limit' : '');
+        const dailyUsed = (usage && usage.daily && usage.daily.used !== null && usage.daily.used !== undefined) ? usage.daily.used : 0;
+        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null && usage.daily.limit !== undefined) ? usage.daily.limit : 3;
+        usageBadge.className = 'usage-badge' + (dailyUsed >= dailyLimit ? ' near-limit' : '');
         badgeText.textContent = `${dailyUsed}/${dailyLimit}`;
       }
     }
 
     // 2. Lock / Unlock system toggle options based on tier
-    systems.forEach(btn => {
+    agentSystems.forEach(btn => {
       if (btn) {
         const system = btn.getAttribute('data-system');
         if (['cursor', 'windsurf', 'copilot'].includes(system)) {
@@ -564,10 +823,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // 3. Toggle upgrade banner
+    // 3. Toggle and update upgrade banner
     if (upgradeBanner) {
-      if (tier === 'free' && usage && usage.daily && usage.daily.used >= usage.daily.limit) {
-        upgradeBanner.classList.remove('hidden');
+      const bannerStrong = upgradeBanner.querySelector('.upgrade-banner-text strong');
+      const bannerSpan = upgradeBanner.querySelector('.upgrade-banner-text span');
+      const bannerBtn = document.getElementById('btn-upgrade-banner');
+
+      if (tier === 'free') {
+        const dailyLimitReached = usage && usage.daily && usage.daily.used >= usage.daily.limit;
+        const weeklyLimitReached = usage && usage.weekly && usage.weekly.used >= usage.weekly.limit;
+        if (dailyLimitReached || weeklyLimitReached) {
+          upgradeBanner.classList.remove('hidden');
+          if (bannerStrong) {
+            bannerStrong.textContent = dailyLimitReached ? 'Daily limit reached!' : 'Weekly limit reached!';
+          }
+          if (bannerSpan) {
+            bannerSpan.textContent = 'Upgrade to Pro (2,500 credits) or use your own key';
+          }
+          if (bannerBtn) {
+            bannerBtn.innerHTML = 'Get Credits — $9.99';
+          }
+        } else {
+          upgradeBanner.classList.add('hidden');
+        }
+      } else if (tier === 'pro') {
+        const isLegacyActive = (usage && usage.subscription === 'active');
+        if (!isLegacyActive) {
+          const creditsRemaining = (usage && usage.credits && usage.credits.remaining !== undefined) ? usage.credits.remaining : 0;
+          if (creditsRemaining <= 0) {
+            upgradeBanner.classList.remove('hidden');
+            if (bannerStrong) bannerStrong.textContent = 'Out of credits!';
+            if (bannerSpan) bannerSpan.textContent = 'Buy 2,500 more credits or use your own API key';
+            if (bannerBtn) bannerBtn.innerHTML = 'Buy Credits — $9.99';
+          } else {
+            upgradeBanner.classList.add('hidden');
+          }
+        } else {
+          upgradeBanner.classList.add('hidden');
+        }
       } else {
         upgradeBanner.classList.add('hidden');
       }
@@ -600,10 +893,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (btnUpgradePro) {
+        const upgradeProSpan = btnUpgradePro.querySelector('span');
         if (tier === 'pro') {
-          btnUpgradePro.classList.add('hidden');
+          const isLegacyActive = (usage && usage.subscription === 'active');
+          if (isLegacyActive) {
+            btnUpgradePro.classList.add('hidden');
+          } else {
+            btnUpgradePro.classList.remove('hidden');
+            if (upgradeProSpan) {
+              upgradeProSpan.textContent = 'Buy 2,500 Credits — $9.99';
+            }
+          }
         } else {
           btnUpgradePro.classList.remove('hidden');
+          if (upgradeProSpan) {
+            upgradeProSpan.textContent = 'Upgrade to Pro — $9.99';
+          }
         }
       }
     } else {
@@ -613,38 +918,71 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 5. Update Account Stats & Bars
     if (usageDailyText && usageDailyBar && usageMonthlyText && usageMonthlyBar) {
-      if (tier === 'pro') {
-        usageDailyText.textContent = 'Unlimited';
-        usageDailyBar.style.width = '100%';
+      const usageDailyLabel = document.getElementById('usage-daily-label');
+      const usageMonthlyLabel = document.getElementById('usage-monthly-label');
+      const usageMonthlyRow = document.getElementById('usage-monthly-row');
 
-        const monthlyUsed = (usage && usage.monthly) ? usage.monthly.used : 0;
-        const monthlyLimit = (usage && usage.monthly) ? usage.monthly.limit : 1250;
-        usageMonthlyText.textContent = `${monthlyUsed} / ${monthlyLimit}`;
-        const pct = Math.min(100, (monthlyUsed / monthlyLimit) * 100);
-        usageMonthlyBar.style.width = `${pct}%`;
+      if (tier === 'pro') {
+        const isLegacyActive = (usage && usage.subscription === 'active');
+        
+        if (isLegacyActive) {
+          if (usageDailyLabel) usageDailyLabel.textContent = 'Monthly Usage';
+          const monthlyUsed = (usage && usage.monthly) ? usage.monthly.used : 0;
+          const monthlyLimit = (usage && usage.monthly) ? usage.monthly.limit : 1250;
+          usageDailyText.textContent = `${monthlyUsed} / ${monthlyLimit}`;
+          const pct = Math.min(100, (monthlyUsed / monthlyLimit) * 100);
+          usageDailyBar.style.width = `${pct}%`;
+          
+          if (usageMonthlyRow) usageMonthlyRow.classList.add('hidden');
+        } else {
+          if (usageDailyLabel) usageDailyLabel.textContent = 'Credits Remaining';
+          const creditsRemaining = (usage && usage.credits && usage.credits.remaining !== undefined) ? usage.credits.remaining : 0;
+          usageDailyText.textContent = `${creditsRemaining.toLocaleString()} / 2,500`;
+          const creditPct = Math.min(100, (creditsRemaining / 2500) * 100);
+          usageDailyBar.style.width = `${creditPct}%`;
+          
+          if (usageMonthlyRow) usageMonthlyRow.classList.add('hidden');
+        }
       } else if (tier === 'byok') {
+        if (usageDailyLabel) usageDailyLabel.textContent = 'Daily Usage';
         usageDailyText.textContent = 'Unlimited';
         usageDailyBar.style.width = '100%';
-        usageMonthlyText.textContent = 'Unlimited';
-        usageMonthlyBar.style.width = '100%';
+        
+        if (usageMonthlyRow) usageMonthlyRow.classList.add('hidden');
       } else {
-        const dailyUsed = (usage && usage.daily) ? usage.daily.used : 0;
-        const dailyLimit = (usage && usage.daily) ? usage.daily.limit : 10;
+        if (usageDailyLabel) usageDailyLabel.textContent = 'Daily Usage';
+        const dailyUsed = (usage && usage.daily && usage.daily.used !== null && usage.daily.used !== undefined) ? usage.daily.used : 0;
+        const dailyLimit = (usage && usage.daily && usage.daily.limit !== null && usage.daily.limit !== undefined) ? usage.daily.limit : 3;
         usageDailyText.textContent = `${dailyUsed} / ${dailyLimit}`;
-        const dailyPct = Math.min(100, (dailyUsed / dailyLimit) * 100);
+        const dailyPct = dailyLimit > 0 ? Math.min(100, (dailyUsed / dailyLimit) * 100) : 0;
         usageDailyBar.style.width = `${dailyPct}%`;
 
-        const monthlyUsed = (usage && usage.monthly) ? usage.monthly.used : 0;
-        const monthlyLimit = (usage && usage.monthly) ? usage.monthly.limit : 1250;
-        usageMonthlyText.textContent = `${monthlyUsed} / ${monthlyLimit}`;
-        const monthlyPct = Math.min(100, (monthlyUsed / monthlyLimit) * 100);
-        usageMonthlyBar.style.width = `${monthlyPct}%`;
+        if (usageMonthlyRow) usageMonthlyRow.classList.remove('hidden');
+        if (usageMonthlyLabel) usageMonthlyLabel.textContent = 'Weekly Usage';
+        
+        const weeklyUsed = (usage && usage.weekly && usage.weekly.used !== null && usage.weekly.used !== undefined) ? usage.weekly.used : 0;
+        const weeklyLimit = (usage && usage.weekly && usage.weekly.limit !== null && usage.weekly.limit !== undefined) ? usage.weekly.limit : 10;
+        usageMonthlyText.textContent = `${weeklyUsed} / ${weeklyLimit}`;
+        const weeklyPct = weeklyLimit > 0 ? Math.min(100, (weeklyUsed / weeklyLimit) * 100) : 0;
+        usageMonthlyBar.style.width = `${weeklyPct}%`;
+      }
+    }
+
+    // 6. Update Pro Options Visibility (Twitter Deep Capture)
+    const proOptions = document.getElementById('pro-options');
+    if (proOptions) {
+      const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const isTwitter = activeTab && (activeTab.url && (activeTab.url.includes('x.com') || activeTab.url.includes('twitter.com')));
+      if (tier === 'pro' && isTwitter) {
+        proOptions.classList.remove('hidden');
+      } else {
+        proOptions.classList.add('hidden');
       }
     }
   }
 
   function updateSystemUI() {
-    systems.forEach(btn => {
+    agentSystems.forEach(btn => {
       if (btn) {
         if (btn.getAttribute('data-system') === currentSystem) {
           btn.classList.add('active');
@@ -654,8 +992,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
+    if (formatSelectorGroup) {
+      if (currentSystem === 'claude') {
+        formatSelectorGroup.classList.remove('hidden');
+      } else {
+        formatSelectorGroup.classList.add('hidden');
+      }
+    }
+
     if (btnText) {
-      if (currentSystem === 'antigravity') {
+      if (currentSystem === 'antigravity' || (currentSystem === 'claude' && currentFormat === 'skill')) {
         btnText.textContent = 'Turn into Skill';
       } else {
         btnText.textContent = 'Turn into Rule';
@@ -673,7 +1019,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (currentSystem === 'antigravity') {
         scopeHelp.textContent = 'Saves to ~/.gemini/config/skills/';
       } else if (currentSystem === 'claude') {
-        scopeHelp.textContent = 'Saves to ~/.claude/rules/';
+        if (currentFormat === 'skill') {
+          scopeHelp.textContent = 'Saves to ~/.claude/skills/';
+        } else {
+          scopeHelp.textContent = 'Saves to ~/.claude/rules/';
+        }
       } else if (currentSystem === 'cursor') {
         scopeHelp.textContent = 'Saves to ~/.cursor/rules/';
       } else if (currentSystem === 'windsurf') {
@@ -688,7 +1038,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (currentSystem === 'antigravity') {
         scopeHelp.textContent = 'Saves to project-folder/.agents/skills/';
       } else if (currentSystem === 'claude') {
-        scopeHelp.textContent = 'Saves to project-folder/.claude/rules/';
+        if (currentFormat === 'skill') {
+          scopeHelp.textContent = 'Saves to project-folder/.claude/skills/';
+        } else {
+          scopeHelp.textContent = 'Saves to project-folder/.claude/rules/';
+        }
       } else if (currentSystem === 'cursor') {
         scopeHelp.textContent = 'Saves to project-folder/.cursor/rules/';
       } else if (currentSystem === 'windsurf') {
@@ -757,17 +1111,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (isGenerating) {
       btnGenerate.disabled = true;
-      btnText.textContent = currentSystem === 'antigravity' ? 'Generating Skill...' : 'Generating Rule...';
+      btnText.textContent = (currentSystem === 'antigravity' || (currentSystem === 'claude' && currentFormat === 'skill')) ? 'Generating Skill...' : 'Generating Rule...';
       btnLoader.classList.remove('hidden');
     } else {
       btnGenerate.disabled = false;
-      btnText.textContent = currentSystem === 'antigravity' ? 'Turn into Skill' : 'Turn into Rule';
+      btnText.textContent = (currentSystem === 'antigravity' || (currentSystem === 'claude' && currentFormat === 'skill')) ? 'Turn into Skill' : 'Turn into Rule';
       btnLoader.classList.add('hidden');
     }
   }
 
   // Content extraction function injected into the active tab
-  function extractPageContent() {
+  async function extractPageContent(deepCapture) {
     const selection = window.getSelection().toString().trim();
     if (selection) {
       return { type: 'selection', title: document.title, content: selection };
@@ -784,27 +1138,66 @@ document.addEventListener('DOMContentLoaded', async () => {
         authorHandle = urlParts[statusIndex - 1].toLowerCase();
       }
 
-      const tweets = Array.from(document.querySelectorAll('article[data-testid="tweet"]'));
-      if (tweets.length > 0) {
-        const threadText = [];
-
+      const getThreadContent = () => {
+        const tweets = Array.from(document.querySelectorAll('article[data-testid="tweet"]'));
+        const uniqueTweets = new Map();
+        
         tweets.forEach((tweet) => {
           const userDiv = tweet.querySelector('[data-testid="User-Name"]');
           const textDiv = tweet.querySelector('[data-testid="tweetText"]');
+          const timeEl = tweet.querySelector('time');
+          const tweetId = timeEl ? timeEl.parentElement.getAttribute('href') : Math.random().toString();
+
           if (textDiv) {
             const text = textDiv.innerText.trim();
             if (userDiv) {
               const handleMatch = userDiv.innerText.match(/@(\w+)/);
               const handle = handleMatch ? handleMatch[1].toLowerCase() : '';
               if (handle === authorHandle || !authorHandle) {
-                threadText.push(text);
+                uniqueTweets.set(tweetId, text);
               }
-            } else {
-              threadText.push(text);
+            } else if (!authorHandle) {
+              uniqueTweets.set(tweetId, text);
             }
           }
         });
+        return Array.from(uniqueTweets.values());
+      };
 
+      if (deepCapture) {
+        // PRO FEATURE: Auto-scroll to capture more of the thread
+        let previousCount = 0;
+        let currentThread = [];
+        let scrollAttempts = 0;
+        const maxScrolls = 8; // Safety limit
+
+        while (scrollAttempts < maxScrolls) {
+          currentThread = getThreadContent();
+          if (currentThread.length === previousCount && scrollAttempts > 2) break;
+          
+          previousCount = currentThread.length;
+          window.scrollBy(0, 800);
+          if (document.documentElement) document.documentElement.scrollTop += 800;
+          if (document.body) document.body.scrollTop += 800;
+          
+          await new Promise(r => setTimeout(r, 600)); // Wait for lazy load
+          scrollAttempts++;
+        }
+        
+        // Scroll back to top slightly to look natural
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (currentThread.length > 0) {
+          return {
+            type: 'tweet',
+            title: `Deep Captured Thread by @${authorHandle || 'author'}`,
+            content: currentThread.join('\n\n---\n\n')
+          };
+        }
+      } else {
+        // Standard Capture
+        const threadText = getThreadContent();
         if (threadText.length > 0) {
           return {
             type: 'tweet',
@@ -862,23 +1255,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // 3. Load settings from storage
       const settings = await chrome.storage.local.get([
-        'apiKey', 'scope', 'workspacePath', 'system', 'connectionMode', 'cloudUrl'
+        'apiKey', 'scope', 'workspacePath', 'system', 'connectionMode', 'cloudUrl', 'googleClientId', 'agentFormat'
       ]);
 
       if (apiKeyInput && settings.apiKey) apiKeyInput.value = settings.apiKey;
+      if (clientIdInput) clientIdInput.value = settings.googleClientId || '';
       if (workspaceInput) workspaceInput.value = settings.workspacePath || '';
       if (cloudUrlInput) cloudUrlInput.value = settings.cloudUrl || '';
       
       if (settings.scope) currentScope = settings.scope;
       if (settings.system) currentSystem = settings.system;
       if (settings.connectionMode) currentConnMode = settings.connectionMode;
+      if (settings.agentFormat) currentFormat = settings.agentFormat;
 
+      updateFormatUI();
       updateScopeUI();
       updateSystemUI();
       updateConnModeUI();
       
       // 4. Initial UI refresh (badge, bars, locks, banner)
       await refreshUI();
+
+      // 5. Check background OAuth persistent state
+      const authState = await chrome.storage.local.get(['lastAuthStatus', 'lastAuthError']);
+      console.log('[popup init] Background OAuth state:', authState);
+      if (authState.lastAuthStatus === 'failed' && authState.lastAuthError) {
+        showStatus('error', `${authState.lastAuthError}`, '❌');
+        await chrome.storage.local.remove(['lastAuthStatus', 'lastAuthError']);
+      } else if (authState.lastAuthStatus === 'success') {
+        showStatus('success', 'Logged in successfully with Google!', '🚀');
+        await chrome.storage.local.remove(['lastAuthStatus', 'lastAuthError']);
+      }
     } catch (err) {
       console.error('Error during startup initialization:', err);
     }

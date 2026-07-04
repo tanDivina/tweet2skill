@@ -15,52 +15,107 @@
 
 ---
 
-## Supported Editor & Agent Systems
-- **Google Antigravity:** Generates skill directories (`SKILL.md`) under `~/.gemini/config/skills/` or project-scoped `.agents/skills/`.
-- **Claude Code:** Generates custom instruction rules under `~/.claude/rules/` or project-scoped `.claude/rules/`.
-- **Cursor:** Generates cursor rules under `~/.cursor/rules/` or project-scoped `.cursor/rules/` (Pro/BYOK).
-- **Windsurf:** Appends rules to `~/.windsurfrules` or project-scoped `.windsurfrules` (Pro/BYOK).
-- **GitHub Copilot:** Appends instructions to `~/.github/copilot-instructions.md` or project-scoped `.github/copilot-instructions.md` (Pro/BYOK).
-
----
-
 ## Features
-- **Smart DOM Extraction:** Highlight a specific code snippet or paragraph, or click to auto-extract full threads from X (Twitter) status pages.
-- **Dual connection modes:**
-  - **Local Host:** Uses a native messaging Python script (`save_skill.py`) to write generated rules directly into your computer's editor folders silently.
-  - **Cloud Mode:** Generates and triggers browser downloads directly when the native host bridge is not running.
-- **Bring Your Own Key (BYOK):** Set your own Gemini API Key locally in the extension settings to run unlimited generations directly through the Gemini API.
+
+- **Smart DOM Extraction:**
+  - **Highlight Mode:** Convert only your selected/highlighted text.
+  - **Thread Mode:** Extract full X/Twitter detail pages (automatically combines tweets by the same author in a thread).
+  - **Page Mode:** Extracts clean, metadata-stripped body text from general web pages.
+- **Interactive UI:** A beautiful dark-theme glassmorphism Chrome popup UI built using modern design standards.
+- **Zero-Dependency Native Host:** Python messaging host uses built-in `urllib` to contact Gemini API. No `pip install` required.
+- **Environment Aware:** Shell wrapper ensures `pyenv` and user environment variables load correctly.
+- **Scope & System Options:**
+  - **Google Antigravity:** Saves skills to `~/.gemini/config/skills/` (Global) or `.agents/skills/` (Workspace) formatted with YAML frontmatter.
+  - **Claude Code:** Saves rules to `~/.claude/rules/` (Global) or `.claude/rules/` (Workspace) formatted as standard markdown.
 
 ---
 
 ## Installation & Setup
 
-### 1. Load the Chrome Extension
-1. Download this repository as a ZIP archive and extract it (or clone it).
-2. Open Google Chrome and navigate to `chrome://extensions/`.
-3. Toggle on **Developer mode** in the top-right corner.
-4. Click the **Load unpacked** button in the top-left corner and select this directory.
-5. Copy the generated **Extension ID** from the extension card — you'll need it to set up the Native Host bridge.
+### Step 1: Load the Chrome Extension
+1. Open Google Chrome and go to `chrome://extensions/`.
+2. Enable **Developer mode** using the toggle in the top-right corner.
+3. Click **Load unpacked** (top-left button).
+4. Select this project directory (`/Users/dorienvandenabbeele/TweetSkill/`).
+5. Copy the generated **Extension ID** (e.g. `cbmghhnbpdfehmkifhlbckcphclmbifn`).
 
-### 2. Set Up the Native Host Bridge (Optional, for Local Saving)
-The local native messaging host allows the extension to write files directly to your hard drive.
-1. Open your terminal inside this project directory.
-2. Run the helper installation script:
+### Step 2: Choose Your Connection Mode
+
+#### Option A: Cloud Mode (Vercel) — Zero Local Setup!
+1. **Deploy to Vercel:** Click the Vercel deploy button or run `vercel` in this directory to deploy the python serverless backend (`api/generate.py`).
+2. Copy your deployed Vercel URL (e.g. `https://tweet2skill.vercel.app`).
+3. Open the extension popup, go to **Settings**, select **Cloud Vercel**, paste your **Vercel Endpoint URL** and **Gemini API Key**, and click **Save Settings**.
+*Your generations will be fetched via the Vercel API and downloaded directly to your browser download folder, prompting you where to save.*
+
+#### Option B: Local Host Mode — Silent Background Saving (No Popups)
+1. Open your terminal in this directory.
+2. Register the local native host by running:
    ```bash
    python3 install.py
    ```
-3. When prompted, paste the **Extension ID** you copied from Chrome.
-4. Open the extension popup, go to **Settings**, choose **Local Host**, configure your **Workspace Path**, and save.
+3. When prompted, paste the **Extension ID** you copied.
+4. Open the extension popup, go to **Settings**, select **Local Host**, enter your **Gemini API Key** and **Local Workspace Path**, and click **Save Settings**.
+*Your generations are written silently directly to your global or workspace directories.*
 
 ---
 
-## Customizing and Modifying
-As an open-source project, developers can modify, extend, or run their own instances:
-- **API Key & Limits:** The default proxy handles up to 10 generations per day. To remove all limits locally, simply paste your own Gemini API key under **Settings > Bring Your Own Key (BYOK)**.
-- **Custom Prompts:** You can modify the prompts or agent configurations inside `popup.js` and `save_skill.py`.
-- **Add New Editor Formats:** Extend the systems array inside `popup.js` and target file path mappings inside `save_skill.py` to support other editors like Zed, VS Code, or Vim.
+## How to Use
+
+1. Go to any page (e.g. an X/Twitter post containing prompt instructions, a GitHub Readme, or a Codelab).
+2. Open the extension popup.
+3. Choose the target **Agent System**:
+   - **Antigravity:** Formats as a Custom Agent Skill with YAML frontmatter.
+   - **Claude Code:** Formats as a clean markdown Rule (`CLAUDE.md` rule format).
+4. Choose the target scope:
+   - **Global:** Skill/Rule is instantly available across all your sessions.
+   - **Workspace:** Skill/Rule is only loaded when working within the configured workspace.
+5. Click **Turn into Skill** / **Turn into Rule**.
+6. The Linker will automatically scrape, clean, and format the instructions using Gemini API, then save the final markdown file directly into your filesystem!
 
 ---
 
-## Privacy & Security
-All Gemini API keys, workspace paths, and authorization tokens are stored locally inside Chrome's secure `chrome.storage.local` store. No credentials ever touch third-party servers.
+## Troubleshooting & Logs
+
+Because Chrome runs Native Messaging hosts in the background, `print` statements are blocked (they crash the socket).
+To debug or check status, inspect:
+- **Host Logs:** Check the local file `host.log` in this folder.
+- **Chrome Debugger:** Right-click the extension icon -> click **Inspect Popup** to see runtime Javascript errors.
+
+---
+
+## How to Package and Distribute (Gumroad / Lemon Squeezy / Web Store)
+
+If you want to package this to sell or share with other developers:
+
+### Option A: Packaged Local Download (For Developers)
+1. **Compile the Python Host:**
+   To remove the requirement for python on user systems, compile `save_skill.py` into a binary:
+   ```bash
+   pip install pyinstaller
+   pyinstaller --onefile save_skill.py
+   ```
+2. **Automate Host Registry:**
+   Update `install.py` to compile as an installer (.dmg / .exe) that writes the `com.antigravity.linker.json` file automatically into the OS default folder:
+   - **macOS:** `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/`
+   - **Windows:** Registry key at `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.antigravity.linker`
+3. **Publish Extension:**
+   Zip the extension folder (excluding python/shell scripts and `host.log`) and upload it to the **Chrome Web Store Developer Dashboard** ($5 fee). Specify that it uses `nativeMessaging` in your review justifications.
+4. **Digital storefront:** Use Gumroad or Lemon Squeezy to deliver the executable/installer bundle.
+
+### Option B: Cloud-Based SaaS Model (Easiest & Most Premium)
+Instead of local native messaging (which requires a local script running on the user's OS):
+1. **Build a Backend API:**
+   Deploy `save_skill.py` as an API route on a cloud server (Vercel, Render, or Supabase).
+2. **Update Popup Javascript:**
+   Instead of `chrome.runtime.sendNativeMessage`, make a standard `fetch()` post request to your backend API containing the scraped content.
+3. **Download File directly:**
+   The backend API returns the formatted `SKILL.md` markdown text, and the extension popup displays a button to copy it or triggers a file download:
+   ```js
+   // Chrome Extension download logic:
+   chrome.downloads.download({
+     url: 'data:text/markdown;charset=utf-8,' + encodeURIComponent(markdownText),
+     filename: 'SKILL.md',
+     saveAs: true
+   });
+   ```
+4. **Subscription SaaS:** Sell a premium subscription using Stripe Billing to cover your Gemini API cost.

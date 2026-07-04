@@ -6,6 +6,11 @@ host.log
 __pycache__/
 *.pyc
 
+# Vercel deployment folder
+.vercel/
+
 # OS system files
 .DS_Store
 Thumbs.db
+.vercel
+.env*.local

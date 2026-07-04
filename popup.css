@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 :root {
   --bg-gradient: linear-gradient(180deg, #0a0a0c 0%, #111115 100%);
   --panel-bg: rgba(20, 20, 25, 0.85);
@@ -65,7 +71,7 @@ body {
 
 /* Logo Box Matching Brand Style */
 .logo-box {
-  border: 1.5px solid var(--primary);
+  border: none;
   padding: 12px 8px;
   text-align: center;
   margin-bottom: 16px;
@@ -95,6 +101,7 @@ body {
 
 .brand-logo-svg {
   display: block;
+  stroke: var(--accent);
 }
 
 .brand-title {
@@ -144,9 +151,9 @@ body {
 }
 
 .usage-badge.is-pro {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
-  border-color: rgba(251, 191, 36, 0.3);
-  color: var(--gold);
+  background: rgba(168, 255, 53, 0.08);
+  border-color: rgba(168, 255, 53, 0.25);
+  color: var(--accent);
 }
 
 .usage-badge.is-byok {
@@ -326,7 +333,7 @@ body {
 .pro-lock-icon {
   width: 10px;
   height: 10px;
-  color: var(--gold);
+  color: var(--accent);
   flex-shrink: 0;
   opacity: 0.8;
   display: none;
@@ -486,7 +493,7 @@ input:focus {
 .toggle-icon {
   width: 14px;
   height: 14px;
-  stroke: currentColor;
+  stroke: var(--accent);
   stroke-width: 2.5;
   fill: none;
   display: inline-block;
@@ -497,8 +504,8 @@ input:focus {
 .eye-icon {
   width: 16px;
   height: 16px;
-  stroke: currentColor;
-  stroke-width: 2;
+  stroke: var(--accent);
+  stroke-width: 2.5;
   fill: none;
   display: block;
 }
@@ -517,11 +524,13 @@ input:focus {
    ====================================================================== */
 
 .upgrade-banner {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(245, 158, 11, 0.1));
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(168, 255, 53, 0.3) !important;
   border-radius: 8px;
   padding: 14px;
   animation: slideIn 0.3s ease forwards;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9);
 }
 
 .upgrade-banner-content {
@@ -532,7 +541,7 @@ input:focus {
 }
 
 .upgrade-banner-icon {
-  color: #fbbf24;
+  color: #a8ff35 !important;
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -542,11 +551,11 @@ input:focus {
   flex-direction: column;
   gap: 2px;
   font-size: 12px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .upgrade-banner-text strong {
-  color: var(--text-primary);
+  color: #ffffff !important;
   font-weight: 700;
 }
 
@@ -555,11 +564,19 @@ input:focus {
   gap: 8px;
 }
 
+/* Base button rotating animation properties */
+@keyframes rotate-glow {
+  to {
+    --angle: 360deg;
+  }
+}
+
 .upgrade-btn-gold {
+  position: relative;
   flex: 1;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #000000;
-  border: none;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: none !important;
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 12px;
@@ -569,11 +586,46 @@ input:focus {
   font-family: var(--font-family);
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  z-index: 1;
+}
+
+/* Rotating glow border pseudo elements */
+.upgrade-btn-gold::before {
+  content: '';
+  position: absolute;
+  top: -1.5px;
+  left: -1.5px;
+  right: -1.5px;
+  bottom: -1.5px;
+  background: conic-gradient(from var(--angle), transparent, #a8ff35, transparent 30%, #a8ff35, transparent 70%);
+  border-radius: 7.5px;
+  z-index: -1;
+  animation: rotate-glow 2s linear infinite;
+}
+
+.upgrade-btn-gold::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: conic-gradient(from var(--angle), transparent, rgba(168, 255, 53, 0.6), transparent 30%, rgba(168, 255, 53, 0.6), transparent 70%);
+  border-radius: 8px;
+  z-index: -2;
+  filter: blur(4px);
+  animation: rotate-glow 2s linear infinite;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 .upgrade-btn-gold:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.upgrade-btn-gold:hover::after {
+  opacity: 1;
+  filter: blur(6px);
 }
 
 .upgrade-btn-secondary {
@@ -630,7 +682,7 @@ input:focus {
 
 .collapsible-chevron {
   transition: transform 0.3s ease;
-  stroke: currentColor;
+  stroke: var(--accent);
   fill: none;
 }
 
@@ -781,9 +833,9 @@ input:focus {
 }
 
 .tier-badge.tier-pro {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.15));
-  color: var(--gold);
-  border: 1px solid rgba(251, 191, 36, 0.3);
+  background: rgba(168, 255, 53, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(168, 255, 53, 0.2);
 }
 
 .tier-badge.tier-byok {
@@ -855,15 +907,16 @@ input:focus {
 
 /* Upgrade to Pro button */
 .upgrade-pro-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
   padding: 11px 16px;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #000000;
-  border: none;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: none !important;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 700;
@@ -872,12 +925,59 @@ input:focus {
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px var(--gold-glow);
+  z-index: 1;
+}
+
+/* Green Star styling inside the button */
+.upgrade-pro-btn svg {
+  color: #a8ff35 !important;
+  fill: rgba(168, 255, 53, 0.25) !important;
+  stroke: #a8ff35 !important;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+/* Rotating glow border pseudo elements for Pro button */
+.upgrade-pro-btn::before {
+  content: '';
+  position: absolute;
+  top: -1.5px;
+  left: -1.5px;
+  right: -1.5px;
+  bottom: -1.5px;
+  background: conic-gradient(from var(--angle), transparent, #a8ff35, transparent 30%, #a8ff35, transparent 70%);
+  border-radius: 7.5px;
+  z-index: -1;
+  animation: rotate-glow 2.5s linear infinite;
+}
+
+.upgrade-pro-btn::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: conic-gradient(from var(--angle), transparent, rgba(168, 255, 53, 0.6), transparent 30%, rgba(168, 255, 53, 0.6), transparent 70%);
+  border-radius: 8px;
+  z-index: -2;
+  filter: blur(4px);
+  animation: rotate-glow 2.5s linear infinite;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, filter 0.2s ease;
 }
 
 .upgrade-pro-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(251, 191, 36, 0.35);
+}
+
+.upgrade-pro-btn:hover::after {
+  opacity: 1;
+  filter: blur(6px);
+}
+
+.upgrade-pro-btn:hover svg {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .upgrade-pro-btn:active {
@@ -885,12 +985,16 @@ input:focus {
 }
 
 .upgrade-pro-btn.is-pro {
-  background: var(--secondary);
-  color: var(--gold);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  box-shadow: none;
+  background: var(--secondary) !important;
+  color: var(--accent) !important;
+  border: 1px solid rgba(168, 255, 53, 0.3) !important;
+  box-shadow: none !important;
   cursor: default;
   pointer-events: none;
+}
+
+.upgrade-pro-btn.is-pro::before, .upgrade-pro-btn.is-pro::after {
+  display: none !important;
 }
 
 /* Logout Button */
@@ -924,3 +1028,120 @@ input:focus {
   text-decoration: underline;
   opacity: 0.95;
 }
+
+/* Switch Toggle Component */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 20px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: .4s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+input:checked + .slider:before {
+  transform: translateX(14px);
+  background-color: #000;
+}
+
+.slider.round {
+  border-radius: 20px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Pro Options Feature */
+.pro-options-container {
+  margin-top: 14px;
+  margin-bottom: 14px;
+  padding: 12px;
+  background: rgba(168, 255, 53, 0.04);
+  border: 1px solid rgba(168, 255, 53, 0.15);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pro-option-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pro-option-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.pro-option-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.pro-option-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+/* Feedback Specific Styles */
+.feedback-textarea, .feedback-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: var(--font-family);
+}
+.feedback-textarea:focus, .feedback-input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+.feedback-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+

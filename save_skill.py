@@ -12,7 +12,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE = os.path.join(SCRIPT_DIR, "host.log")
 
 # Proxy API base URL
-PROXY_API_BASE = "https://tweet2skill.hero-apps.com"
+PROXY_API_BASE = "https://tweetskill.vercel.app"
 
 def log(message):
     """Write log messages to a local file to avoid cluttering stdout."""
@@ -121,14 +121,15 @@ def call_gemini_api(api_key, content, source_url, agent_system="antigravity"):
         log(f"Request Exception: {str(e)}")
         raise e
 
-def call_proxy_api(content, source_url, agent_system, device_id, auth_token=None, api_key=None):
+def call_proxy_api(content, source_url, agent_system, device_id, auth_token=None, api_key=None, agent_format="rule"):
     """Route the generation request through the Tweet2Skill proxy API."""
     endpoint = f"{PROXY_API_BASE}/api/generate"
     
     payload = {
         "url": source_url,
         "content": content,
-        "agentSystem": agent_system
+        "agentSystem": agent_system,
+        "agentFormat": agent_format
     }
     
     # Include API key if BYOK
@@ -169,7 +170,7 @@ def call_proxy_api(content, source_url, agent_system, device_id, auth_token=None
             err_json = json.loads(error_body)
             msg = err_json.get("message", f"HTTP {e.code}")
             if e.code == 429:
-                raise Exception(f"Daily limit reached. Upgrade to Pro ($19/yr) or use your own API key.")
+                raise Exception(f"Daily/weekly limit reached. Buy Pro Credits ($9.99) or use your own API key.")
             raise Exception(f"Proxy API Error: {msg}")
         except json.JSONDecodeError:
             raise Exception(f"Proxy API returned status {e.code}")
@@ -177,22 +178,40 @@ def call_proxy_api(content, source_url, agent_system, device_id, auth_token=None
         log(f"Proxy Request Exception: {str(e)}")
         raise e
 
-def get_system_prompt(agent_system):
+def get_system_prompt(agent_system, agent_format="rule"):
     """Get the appropriate system prompt for the given agent system."""
     if agent_system == "claude":
-        return (
-            "You are a Claude Code custom rule generator. Take the provided web or tweet content "
-            "and convert it into a structured Markdown block representing a Claude Code development rule or guideline.\n\n"
-            "The output must exactly follow this format:\n"
-            "# [Rule Title]\n\n"
-            "[Brief description of what this rule is and when it applies. Keep it extremely concise.]\n\n"
-            "## Instructions / Guidelines\n"
-            "[Convert the core guidelines, prompts, coding patterns, or rules into precise, clean, action-oriented instructions for the Claude Code CLI agent.]\n\n"
-            "CRITICAL RULES:\n"
-            "1. DO NOT include any YAML frontmatter or triple-dashes (---).\n"
-            "2. DO NOT wrap the output in ```markdown or ``` block code fences.\n"
-            "3. Do not add any conversational text before or after the markdown block."
-        )
+        if agent_format == "skill":
+            return (
+                "You are a Claude Code Skill generator. Take the provided web or tweet content "
+                "and convert it into a structured Markdown block representing a Claude Code agent skill.\n\n"
+                "The output must exactly follow this format, including the YAML frontmatter (between triple-dashes):\n"
+                "---\n"
+                "name: [Short, clear, lowercase, kebab-case action-oriented skill name matching directory slug]\n"
+                "description: [One or two sentences explaining exactly WHEN the agent should trigger and use this skill]\n"
+                "---\n\n"
+                "# [Skill Name in Title Case]\n\n"
+                "[Brief description of what this skill does and when to use it.]\n\n"
+                "## Instructions\n"
+                "[Convert the core rules, steps, or prompts in the provided content into precise, clean, action-oriented agent guidelines.]\n\n"
+                "CRITICAL RULES:\n"
+                "1. Start the response directly with the triple-dashes (---). DO NOT wrap your output in ```markdown or ``` block code fences.\n"
+                "2. Do not add any conversational text before or after the markdown block."
+            )
+        else:
+            return (
+                "You are a Claude Code custom rule generator. Take the provided web or tweet content "
+                "and convert it into a structured Markdown block representing a Claude Code development rule or guideline.\n\n"
+                "The output must exactly follow this format:\n"
+                "# [Rule Title]\n\n"
+                "[Brief description of what this rule is and when it applies. Keep it extremely concise.]\n\n"
+                "## Instructions / Guidelines\n"
+                "[Convert the core guidelines, prompts, coding patterns, or rules into precise, clean, action-oriented instructions for the Claude Code CLI agent.]\n\n"
+                "CRITICAL RULES:\n"
+                "1. DO NOT include any YAML frontmatter or triple-dashes (---).\n"
+                "2. DO NOT wrap the output in ```markdown or ``` block code fences.\n"
+                "3. Do not add any conversational text before or after the markdown block."
+            )
     elif agent_system == "cursor":
         return (
             "You are a Cursor IDE rule generator. Take the provided web or tweet content "
@@ -263,7 +282,7 @@ def clean_markdown(text):
     text = re.sub(r"\s*```$", "", text)
     return text.strip()
 
-def get_file_path(agent_system, slug_name, scope, workspace_path):
+def get_file_path(agent_system, slug_name, scope, workspace_path, agent_format="rule"):
     """Determine the target file path based on agent system and scope."""
     if agent_system == "antigravity":
         if scope == "global":
@@ -277,14 +296,24 @@ def get_file_path(agent_system, slug_name, scope, workspace_path):
         return os.path.join(target_dir, "SKILL.md"), False  # (path, is_append)
 
     elif agent_system == "claude":
-        if scope == "global":
-            target_dir = os.path.expanduser("~/.claude/rules")
+        if agent_format == "skill":
+            if scope == "global":
+                target_dir = os.path.expanduser(f"~/.claude/skills/{slug_name}")
+            else:
+                if not workspace_path:
+                    workspace_path = SCRIPT_DIR
+                target_dir = os.path.join(workspace_path, ".claude", "skills", slug_name)
+            os.makedirs(target_dir, exist_ok=True)
+            return os.path.join(target_dir, "SKILL.md"), False
         else:
-            if not workspace_path:
-                workspace_path = SCRIPT_DIR
-            target_dir = os.path.join(workspace_path, ".claude", "rules")
-        os.makedirs(target_dir, exist_ok=True)
-        return os.path.join(target_dir, f"{slug_name}.md"), False
+            if scope == "global":
+                target_dir = os.path.expanduser("~/.claude/rules")
+            else:
+                if not workspace_path:
+                    workspace_path = SCRIPT_DIR
+                target_dir = os.path.join(workspace_path, ".claude", "rules")
+            os.makedirs(target_dir, exist_ok=True)
+            return os.path.join(target_dir, f"{slug_name}.md"), False
 
     elif agent_system == "cursor":
         if scope == "global":
@@ -318,9 +347,9 @@ def get_file_path(agent_system, slug_name, scope, workspace_path):
     else:
         raise ValueError(f"Unknown agent system: {agent_system}")
 
-def extract_title_and_slug(generated_content, agent_system, fallback_title):
+def extract_title_and_slug(generated_content, agent_system, fallback_title, agent_format="rule"):
     """Extract title and slug from generated content based on agent system."""
-    if agent_system == "antigravity":
+    if agent_system == "antigravity" or (agent_system == "claude" and agent_format == "skill"):
         name_match = re.search(r"^name:\s*([^\n]+)", generated_content, re.MULTILINE)
         if name_match:
             skill_name = name_match.group(1).strip().strip('"').strip("'")
@@ -329,7 +358,7 @@ def extract_title_and_slug(generated_content, agent_system, fallback_title):
         slug_name = slugify(skill_name) or "custom-skill"
         return skill_name, slug_name
     else:
-        # For claude, cursor, windsurf, copilot — extract title from first # heading
+        # For claude rule, cursor, windsurf, copilot — extract title from first # heading
         title_match = re.search(r"^#\s*([^\n]+)", generated_content, re.MULTILINE)
         if title_match:
             rule_title = title_match.group(1).strip()
@@ -347,13 +376,14 @@ def process_request(msg):
     scope = msg.get("scope", "global")
     workspace_path = msg.get("workspacePath", "")
     agent_system = msg.get("agentSystem", "antigravity")
+    agent_format = msg.get("agentFormat", "rule")
     device_id = msg.get("deviceId", "")
     auth_token = msg.get("authToken", "")
 
     if not content:
         return {"status": "error", "message": "No content was extracted to convert."}
 
-    log(f"Processing content from {url} (System: {agent_system}, Scope: {scope})")
+    log(f"Processing content from {url} (System: {agent_system}, Format: {agent_format}, Scope: {scope})")
     
     try:
         # Determine generation method:
@@ -362,19 +392,19 @@ def process_request(msg):
         if api_key:
             # BYOK mode: route through proxy for tracking
             log("BYOK mode: routing through proxy with user's API key")
-            generated_content = call_proxy_api(content, url, agent_system, device_id, auth_token, api_key)
+            generated_content = call_proxy_api(content, url, agent_system, device_id, auth_token, api_key, agent_format=agent_format)
         else:
             # Free/Pro mode: route through proxy using server's API key
             log("Free/Pro mode: routing through proxy")
-            generated_content = call_proxy_api(content, url, agent_system, device_id, auth_token)
+            generated_content = call_proxy_api(content, url, agent_system, device_id, auth_token, agent_format=agent_format)
         
         generated_content = clean_markdown(generated_content)
         
         # Extract title and slug
-        display_name, slug_name = extract_title_and_slug(generated_content, agent_system, title)
+        display_name, slug_name = extract_title_and_slug(generated_content, agent_system, title, agent_format=agent_format)
         
         # Determine file path
-        file_path, is_append = get_file_path(agent_system, slug_name, scope, workspace_path)
+        file_path, is_append = get_file_path(agent_system, slug_name, scope, workspace_path, agent_format=agent_format)
         
         # Write file
         if is_append:
@@ -398,7 +428,7 @@ def process_request(msg):
         # System-specific success message
         system_labels = {
             "antigravity": "skill",
-            "claude": "rule",
+            "claude": "skill" if agent_format == "skill" else "rule",
             "cursor": "rule",
             "windsurf": "rule",
             "copilot": "instruction"
