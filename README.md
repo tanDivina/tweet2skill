@@ -131,9 +131,9 @@ If you are a user looking to install the **official, pre-packaged version** of T
 
 ## License & Usage
 
-This software is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license. 
+This software is open-source and licensed under the **MIT License**. 
 
-*   **Allowed:** Developers are free to inspect the source code, fork the repository, modify the logic, and run local unpacked versions of this extension for personal, non-commercial use.
-*   **Prohibited:** You **cannot** package this software, host its services, or redistribute its components for commercial advantage, retail sales, or monetary compensation under any circumstances.
+*   **Allowed:** Anyone is free to download, inspect, modify, fork, and distribute this software for both personal and commercial purposes, provided the original copyright notice and permission notice are included in all copies.
+
 
 
