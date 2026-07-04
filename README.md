@@ -117,3 +117,23 @@ You can run the parsing logic as a serverless endpoint by hosting the generator 
    });
    ```
 
+---
+
+## ⚡ Non-Developers: Quick Start & Store Installation
+
+If you are a user looking to install the **official, pre-packaged version** of Tweet2Skill without manually running terminal installation commands, loading unpacked folders, or managing python local scripts:
+
+1. **Install from the Web Store:** Visit the official **[Chrome Web Store Page](https://chrome.google.com/webstore/detail/cbmghhnbpdfehmkifhlbckcphclmbifn)** and click **Add to Chrome**.
+2. **Visit our Website:** Check out **[https://tweet2skill.hero-apps.com](https://tweet2skill.hero-apps.com)** to learn more about the tool and explore pricing plans.
+3. **Instant Setup:** The Web Store version is configured to run automatically out-of-the-box in **Cloud Mode** with zero local setup requirements!
+
+---
+
+## License & Usage
+
+This software is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license. 
+
+*   **Allowed:** Developers are free to inspect the source code, fork the repository, modify the logic, and run local unpacked versions of this extension for personal, non-commercial use.
+*   **Prohibited:** You **cannot** package this software, host its services, or redistribute its components for commercial advantage, retail sales, or monetary compensation under any circumstances.
+
+
