@@ -405,7 +405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Default Stripe checkout link / payment link
       const { stripeCheckoutUrl } = await chrome.storage.local.get('stripeCheckoutUrl');
-      const baseCheckoutUrl = stripeCheckoutUrl || 'https://buy.stripe.com/00w14n3nn5Oe7hA6tr4sE00'; // Real live Hero Apps payment link
+      const baseCheckoutUrl = stripeCheckoutUrl || 'https://buy.stripe.com/3cIaEXcXX4Ka31k0534sE01'; // Real live $9.99 Credits Pack link
 
       // Construct Stripe payment link URL with prefilled_email and client_reference_id
       const checkoutUrl = new URL(baseCheckoutUrl);
