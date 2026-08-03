@@ -20,31 +20,39 @@ Convert X/Twitter threads, tweets, and webpages into Antigravity skills or Claud
 
 ### **Detailed Description** [Max 16,000 chars]
 ```text
-Tweet2Skill is the ultimate companion tool for AI-assisted development and pair programming. With a single click, convert any educational tweet, high-value technical X/Twitter thread, or webpage into production-ready Antigravity (AGY) skills, Claude Code rules, or custom system prompts.
+Turn any X/Twitter thread, code snippet, or web documentation into production-ready AI Agent Skills & System Rules instantly.
 
-Stop struggling to copy-paste scattered advice across your browser tabs. Tweet2Skill parses tweets and website contents instantly, utilizes state-of-the-art AI parsing to generate clean developer skills, and saves them directly to your local workspace, Cursor configs, or Claude rules folders.
+Designed for Google Antigravity, Claude Code, Cursor, Windsurf, and GitHub Copilot.
 
-### Core Features:
-* **Instant Conversions**: Convert X/Twitter threads or standard web pages into beautifully formatted markdown skills (.md files) instantly.
-* **Workspace Syncing**: Saves files natively into your target workspace's custom agent skill folders.
-* **Advanced Multi-System Support**: Choose from standard Antigravity structures, Claude Code configurations (.claudecoderc / CLAUDE.md), Cursor settings, Windsurf, or Copilot rules.
-* **Flexible Connections**: Seamlessly switch between zero-config Local mode and secure Cloud Vercel routing.
-* **Bring Your Own Key (BYOK)**: Use your own Google Gemini API key for unlimited free generation.
+Stop manually copying scattered code advice across browser tabs. Tweet2Skill parses tweets and website contents instantly, utilizes state-of-the-art AI parsing to generate clean developer skills, and saves them directly to your workspace or rules folders.
 
-### Flexible Tier Structure:
-1. **Free Anonymous Tier**: Get 3 generations per day (up to 10 per week) with zero signups or accounts required. Excellent for quick, casual use!
-2. **Bring Your Own Key (BYOK)**: Connect your own Gemini API key for 100% free, unlimited, and high-performance generations.
-3. **Pro Credits Pack**: A simple, one-time payment of $9.99 for 2,500 permanent cloud credits. No recurring subscriptions, no monthly commitments—just credits that never expire.
+⚡ CORE FEATURES:
+• Instant Web & Thread Conversion: Parse full X/Twitter threads or technical web documentation into structured markdown skills (.md) in 1 click.
+• Deep Thread Capture (Pro): Auto-scrolls through long X/Twitter threads to capture every single post by the author—eliminating lazy-loading limits.
+• Native Multi-System Support: Export skills pre-formatted for Google Antigravity, Claude Code (.claudecoderc / CLAUDE.md), Cursor (.cursor/rules), Windsurf, and Copilot.
+• Workspace Folder Syncing: Save generated rules silently and directly into your active project folders using local host mode.
+• Bring Your Own Key (BYOK): Connect your own Google Gemini API key for 100% free, cap-less generations.
 
-### How to use it:
-1. Navigate to any educational X/Twitter thread or developer documentation page.
+🛠️ SUPPORTED AI SYSTEMS:
+1. Google Antigravity (AGY Skills)
+2. Claude Code (Rules & Skills)
+3. Cursor (.mdc Rules)
+4. Windsurf (.windsurfrules)
+5. GitHub Copilot (.github/copilot-instructions.md)
+
+🏷️ FLEXIBLE PRICING TIERS:
+• Free Tier: 3 daily generations (up to 10/week) with zero signup required.
+• Bring Your Own Key (BYOK): 100% free, cap-less usage using your Gemini API key.
+• Pro Credits Pack ($9.99): One-time purchase for 2,500 permanent credits + Deep Thread Capture. No recurring subscriptions!
+
+📖 HOW TO USE:
+1. Navigate to any technical X/Twitter thread or documentation page.
 2. Click the Tweet2Skill extension icon in your toolbar.
-3. Choose your target agent system (e.g., Antigravity, Claude Rules, Cursor, etc.).
-4. Click "Generate Skill".
-5. Your custom developer skill is parsed, saved, and ready to feed to your autonomous AI agents!
+3. Select your target AI agent system and click "Turn into Skill".
+4. Your clean, production-ready skill file is parsed and ready to feed your AI agent!
 
-### Privacy & Security
-Your API keys and workspace directories remain strictly saved inside your browser's local, secure, and encrypted storage. We do not sell or monetize your data.
+🔒 PRIVACY & SECURITY GUARANTEE:
+Your API keys and workspace folder paths remain strictly stored inside your browser's local, encrypted storage. We do not track browsing history, sell data, or monetize your activity.
 
 ---
 Category: Developer Tools
