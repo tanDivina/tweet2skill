@@ -1559,9 +1559,9 @@ body::after {
   text-align: center;
 }
 .web-status-box.success {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  color: #10b981;
+  background: rgba(168, 255, 53, 0.08);
+  border: 1px solid rgba(168, 255, 53, 0.25);
+  color: var(--accent);
 }
 .web-status-box.error {
   background: rgba(239, 68, 68, 0.1);
