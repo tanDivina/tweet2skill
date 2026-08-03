@@ -191,23 +191,82 @@ body::after {
   margin-bottom: 80px;
 }
 
+/* Running Border Beam Animation */
+@keyframes rotateBorderBeam {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .primary-btn {
-  display: inline-block;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 14px 28px;
-  border-radius: 8px;
-  background-color: var(--text-primary);
-  color: var(--bg-primary);
+  border-radius: 10px;
+  background-color: #050507;
+  color: #ffffff;
   text-decoration: none;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
+  overflow: hidden;
+  z-index: 1;
   transition: var(--transition-smooth);
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(168, 255, 53, 0.15);
+  border: none;
+}
+
+/* Rotating conic gradient beam behind inner layer */
+.primary-btn::before {
+  content: "";
+  position: absolute;
+  top: -150%;
+  left: -150%;
+  width: 400%;
+  height: 400%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 270deg,
+    rgba(168, 255, 53, 0.3) 310deg,
+    #a8ff35 345deg,
+    #ffffff 360deg
+  );
+  animation: rotateBorderBeam 3s linear infinite;
+  z-index: -2;
+}
+
+/* Pitch black inner surface mask leaving 1.5px running border */
+.primary-btn::after {
+  content: "";
+  position: absolute;
+  inset: 1.5px;
+  background-color: #07070a;
+  border-radius: 8.5px;
+  z-index: -1;
+  transition: background-color 0.3s ease;
+}
+
+.primary-btn .btn-arrow {
+  transition: transform 0.3s ease;
 }
 
 .primary-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
-  background-color: #f3f3f3;
+  color: #a8ff35;
+  box-shadow: 0 0 25px rgba(168, 255, 53, 0.4), 0 0 50px rgba(168, 255, 53, 0.15);
+}
+
+.primary-btn:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+.primary-btn:hover::after {
+  background-color: #030304;
 }
 
 .secondary-btn {
