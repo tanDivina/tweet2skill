@@ -7,7 +7,7 @@ from google.oauth2 import service_account
 from google.auth.transport.requests import Request
 
 # Configuration details
-EXTENSION_ID = "cbmghhnbpdfehmkifhlbckcphclmbifn"  # Replace with CWS Extension ID
+EXTENSION_ID = "gpggdojppnknejkhhggmpkfpdjmecnbb"  # Replace with CWS Extension ID
 KEY_FILE = "gsc_key.json"
 ZIP_FILE = "tweet2skill-extension.zip"
 

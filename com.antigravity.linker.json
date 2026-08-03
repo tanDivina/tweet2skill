@@ -4,6 +4,7 @@
   "path": "/Users/dorienvandenabbeele/TweetSkill/save_skill.sh",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://kdijbnmfljoifedndcagaamahhmnbphj/"
+    "chrome-extension://kdijbnmfljoifedndcagaamahhmnbphj/",
+    "chrome-extension://gpggdojppnknejkhhggmpkfpdjmecnbb/"
   ]
 }

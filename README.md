@@ -37,7 +37,7 @@
 2. Enable **Developer mode** using the toggle in the top-right corner.
 3. Click **Load unpacked** (top-left button).
 4. Select this project directory (`/Users/dorienvandenabbeele/TweetSkill/`).
-5. Copy the generated **Extension ID** (e.g. `cbmghhnbpdfehmkifhlbckcphclmbifn`).
+5. Copy the generated **Extension ID** (e.g. `gpggdojppnknejkhhggmpkfpdjmecnbb`).
 
 ### Step 2: Choose Your Connection Mode
 
