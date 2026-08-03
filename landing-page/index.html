@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google Analytics 4 (GA4) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GWNW5XH3C4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-GWNW5XH3C4');
+  </script>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tweet2Skill - Turn Web Content & Tweets into AI Agent Skills</title>
@@ -714,6 +724,14 @@
         </div>
       </button>
       <div id="web-feedback-status" class="web-status-box hidden"></div>
+
+      <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-light); text-align: center;">
+        <button id="web-btn-toggle-history" style="background: none; border: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline;">
+          View Your Submissions (<span id="user-fb-count">0</span>)
+        </button>
+      </div>
+
+      <div id="user-fb-history-container" class="hidden" style="margin-top: 12px; max-height: 220px; overflow-y: auto; padding-right: 2px;"></div>
     </div>
   </div>
 
@@ -800,6 +818,12 @@
           const result = await response.json();
           if (response.ok && result.status === 'ok') {
             showWebStatus('Feedback submitted successfully! Thank you.', 'success');
+            saveLocalSubmission({
+              type: webCategory,
+              message: message,
+              email: email || 'Anonymous',
+              timestamp: Date.now()
+            });
             webMessageInput.value = '';
           } else {
             showWebStatus(result.message || 'Failed to submit feedback.', 'error');
@@ -835,6 +859,78 @@
 
     function hideWebStatus() {
       if (webStatusBox) webStatusBox.classList.add('hidden');
+    }
+
+    // --- Feedback Local History Logic ---
+    const toggleHistoryBtn = document.getElementById('web-btn-toggle-history');
+    const historyContainer = document.getElementById('user-fb-history-container');
+    const historyCountSpan = document.getElementById('user-fb-count');
+
+    function getLocalSubmissions() {
+      try {
+        const stored = localStorage.getItem('tweet2skill_user_feedbacks');
+        return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveLocalSubmission(item) {
+      try {
+        const list = getLocalSubmissions();
+        list.unshift(item);
+        localStorage.setItem('tweet2skill_user_feedbacks', JSON.stringify(list));
+        renderHistory();
+      } catch (e) {}
+    }
+
+    function renderHistory() {
+      if (!historyContainer || !historyCountSpan) return;
+      const list = getLocalSubmissions();
+      historyCountSpan.textContent = list.length;
+
+      if (list.length === 0) {
+        historyContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center; margin: 8px 0;">No previous submissions found in this browser.</p>';
+        return;
+      }
+
+      historyContainer.innerHTML = list.map(item => {
+        const dateStr = new Date(item.timestamp || Date.now()).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        const badgeClass = item.type === 'bug' ? 'bug' : 'suggestion';
+        const badgeLabel = item.type === 'bug' ? 'Bug Report' : 'Suggestion';
+
+        return `
+          <div class="fb-history-card">
+            <div class="fb-history-header">
+              <span class="fb-history-badge ${badgeClass}">${badgeLabel}</span>
+              <span class="fb-history-date">${dateStr}</span>
+            </div>
+            <div class="fb-history-msg">${escapeHtml(item.message)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    if (toggleHistoryBtn && historyContainer) {
+      toggleHistoryBtn.onclick = () => {
+        const isHidden = historyContainer.classList.contains('hidden');
+        if (isHidden) {
+          historyContainer.classList.remove('hidden');
+          toggleHistoryBtn.textContent = 'Hide Submissions (' + getLocalSubmissions().length + ')';
+        } else {
+          historyContainer.classList.add('hidden');
+          toggleHistoryBtn.textContent = 'View Your Submissions (' + getLocalSubmissions().length + ')';
+        }
+      };
+      renderHistory();
     }
   </script>
 
