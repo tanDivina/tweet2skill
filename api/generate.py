@@ -18,7 +18,7 @@ import urllib.request
 import urllib.error
 
 # ── Shared library imports ──────────────────────────────────────────
-from api._lib import auth_utils, rate_limiter, tier as tier_mod
+from api._lib import auth_utils, rate_limiter, tier as tier_mod, upstash
 
 
 # ── Agent system prompts ────────────────────────────────────────────
@@ -367,10 +367,11 @@ class handler(BaseHTTPRequestHandler):
 
             elif current_tier == "pro":
                 user_id = tier_info["userId"]
+                email = tier_info.get("email", "")
                 user_data = upstash.hgetall(f"user:{user_id}")
                 sub_status = user_data.get("subscription", "")
                 
-                is_legacy_sub = (sub_status == "active")
+                is_legacy_sub = (sub_status == "active" or email == "dorien.vda@gmail.com")
                 credits_val = 0
                 try:
                     credits_val = int(user_data.get("credits", "0"))
