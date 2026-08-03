@@ -101,6 +101,9 @@ class handler(BaseHTTPRequestHandler):
             # Append directly to Redis list 'feedbacks'
             upstash.rpush("feedbacks", json.dumps(feedback_payload))
 
+            # Dispatch instant email notification via FormSubmit.co
+            send_formsubmit_email(feedback_type, message, email, context, client_ip)
+
             json_response(self, 200, {
                 "status": "ok",
                 "message": "Feedback submitted successfully! Thank you."
@@ -108,3 +111,40 @@ class handler(BaseHTTPRequestHandler):
 
         except Exception as e:
             json_error(self, 500, f"Internal server error: {str(e)}")
+
+
+def send_formsubmit_email(feedback_type, message, email, context, client_ip):
+    """Dispatches instant email notification to support@hero-apps.com via FormSubmit."""
+    import urllib.request
+    import urllib.error
+    try:
+        url = "https://formsubmit.co/ajax/support@hero-apps.com"
+        subject = f"[Tweet2Skill] New {feedback_type.capitalize()} Submission"
+        
+        form_data = {
+            "_subject": subject,
+            "Category": feedback_type.capitalize(),
+            "Message": message,
+            "User Email": email or "Anonymous",
+            "Page URL": context.get("tabUrl", "https://tweet2skill.hero-apps.com"),
+            "Source": context.get("source", "landing-page"),
+            "Client IP": client_ip,
+            "_captcha": "false"
+        }
+        
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(form_data).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "User-Agent": "Tweet2Skill-Backend/1.0"
+            },
+            method="POST"
+        )
+        
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            pass
+    except Exception as err:
+        print(f"FormSubmit dispatch notice: {err}")
+
