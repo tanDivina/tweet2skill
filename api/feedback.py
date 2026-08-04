@@ -118,7 +118,7 @@ def send_formsubmit_email(feedback_type, message, email, context, client_ip):
     import urllib.request
     import urllib.error
     try:
-        url = "https://formsubmit.co/ajax/support@hero-apps.com"
+        url = "https://formsubmit.co/ajax/ad7bcc06f6449271fe01f1e868bb32fe"
         subject = f"[Tweet2Skill] New {feedback_type.capitalize()} Submission"
         
         form_data = {
