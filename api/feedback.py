@@ -138,7 +138,9 @@ def send_formsubmit_email(feedback_type, message, email, context, client_ip):
             headers={
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "User-Agent": "Tweet2Skill-Backend/1.0"
+                "Referer": "https://tweet2skill.hero-apps.com/",
+                "Origin": "https://tweet2skill.hero-apps.com",
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             },
             method="POST"
         )
