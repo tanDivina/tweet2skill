@@ -54,12 +54,41 @@ def upload_extension(token):
             if result.get("uploadState") == "SUCCESS":
                 print("✔ Extension uploaded successfully!")
                 print(f"Details: {result}")
+                return True
             else:
                 print(f"Upload failed: {result}")
+                return False
     except Exception as e:
         print(f"HTTP Error during upload: {e}")
+        return False
+
+def publish_extension(token):
+    """Submits/publishes the updated draft for review in the Chrome Web Store."""
+    print(f"Publishing/submitting extension {EXTENSION_ID} for review...")
+    url = f"https://www.googleapis.com/chromewebstore/v1.1/items/{EXTENSION_ID}/publish"
+    
+    req = urllib.request.Request(
+        url,
+        data=b"",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "x-goog-api-version": "2",
+            "Content-Length": "0"
+        },
+        method="POST"
+    )
+
+    try:
+        with urllib.request.urlopen(req) as res:
+            result = json.loads(res.read().decode("utf-8"))
+            print("✔ Submit for review response:")
+            print(result)
+    except Exception as e:
+        print(f"HTTP Error during publish submission: {e}")
 
 if __name__ == "__main__":
-    print("Initiating automated Chrome Web Store upload...")
+    print("Initiating automated Chrome Web Store upload & submission...")
     token = get_access_token()
-    upload_extension(token)
+    if upload_extension(token):
+        publish_extension(token)
+

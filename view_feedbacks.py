@@ -28,9 +28,9 @@ load_env()
 
 # Import upstash after setting env vars
 try:
-    from api._lib import upstash
+    from api.lib import upstash
 except ImportError:
-    print("Error: Could not import api._lib.upstash. Make sure you run this script from the project root.")
+    print("Error: Could not import api.lib.upstash. Make sure you run this script from the project root.")
     exit(1)
 
 def get_feedbacks():

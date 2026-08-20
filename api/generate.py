@@ -18,7 +18,7 @@ import urllib.request
 import urllib.error
 
 # ── Shared library imports ──────────────────────────────────────────
-from api._lib import auth_utils, rate_limiter, tier as tier_mod, upstash
+from api.lib import auth_utils, rate_limiter, tier as tier_mod, upstash
 
 
 # ── Agent system prompts ────────────────────────────────────────────
@@ -126,9 +126,10 @@ CLAUDE_SKILL_PROMPT = (
 # Enhanced system prompt suffix for Pro tier
 PRO_ENHANCEMENT = (
     "\n\nADDITIONAL PRO ENHANCEMENTS:\n"
-    "- Provide deeper, more detailed instructions with edge-case handling.\n"
+    "- Provide deeper, more detailed instructions with edge-case handling across the full scope of the content.\n"
     "- Include a '## Advanced Notes' section with nuanced best practices.\n"
     "- Where applicable, add context on WHY each rule matters.\n"
+    "- Maintain a holistic, well-proportioned focus across all topics covered in the source content.\n"
     "- Aim for comprehensive, production-grade output."
 )
 
@@ -163,6 +164,16 @@ def call_gemini_api(api_key, content, source_url, agent_system="antigravity", is
 
     if is_pro:
         system_prompt += PRO_ENHANCEMENT
+
+    if "x.com" in source_url.lower() or "twitter.com" in source_url.lower() or "[Tweet 1" in content or "Deep Captured" in content:
+        system_prompt += (
+            "\n\nTHREAD SYNTHESIS GUIDELINES:\n"
+            "- The source material is a multi-part Twitter/X thread or social post.\n"
+            "- Synthesize guidelines and rules from the ENTIRE thread as a unified, cohesive whole.\n"
+            "- Treat Tweet 1 (Main Post) as the primary anchor and overarching topic framework.\n"
+            "- Integrate supporting details and steps from subsequent posts into this framework without hyper-focusing, over-indexing, or fixating on any single individual post in isolation.\n"
+            "- Strictly discard conversational banter, low-signal replies, pleasantries, 'thank you' notes, bookmarks, emojis, and promotional sign-offs. Focus purely on substantive instructions, frameworks, and actionable rules."
+        )
 
     user_prompt = f"Source URL: {source_url}\n\nRaw Content:\n{content}"
 

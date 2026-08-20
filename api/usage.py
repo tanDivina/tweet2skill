@@ -18,8 +18,8 @@ import json
 import os
 import sys
 
-from api._lib import auth_utils, rate_limiter, upstash
-from api._lib.auth_utils import verify_jwt
+from api.lib import auth_utils, rate_limiter, upstash
+from api.lib.auth_utils import verify_jwt
 
 
 def json_response(handler, status_code, data):

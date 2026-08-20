@@ -5,5 +5,7 @@
 # Navigate to the script's directory
 DIR="$(cd "$(dirname "$0")" && pwd)"
 
+export PYTHONDONTWRITEBYTECODE=1
+
 # Execute the python script with the inherited environment
 exec python3 "$DIR/save_skill.py"

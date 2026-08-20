@@ -17,7 +17,7 @@ import os
 import sys
 import time
 
-from api._lib import upstash
+from api.lib import upstash
 
 
 def json_response(handler, status_code, data):

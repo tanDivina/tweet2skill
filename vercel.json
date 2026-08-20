@@ -1,17 +1,21 @@
 {
   "version": 2,
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     },
     {
-      "source": "/privacy",
-      "destination": "/landing-page/privacy.html"
+      "src": "/privacy",
+      "dest": "/landing-page/privacy.html"
     },
     {
-      "source": "/((?!api/|api$).*)",
-      "destination": "/landing-page/$1"
+      "src": "/(og-image-v2\\.png|promo_card_v2\\.jpg|og-image\\.png|promo_card\\.jpg|robots\\.txt|sitemap\\.xml|favicon\\.png|favicon\\.svg|icons/.*|index\\.css|popup\\.css|popup\\.js)",
+      "dest": "/landing-page/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/serve_html"
     }
   ],
   "headers": [

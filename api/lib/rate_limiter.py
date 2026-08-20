@@ -6,7 +6,7 @@ All counters use atomic INCR with auto-expiring keys.
 """
 
 import time
-from api._lib import upstash
+from api.lib import upstash
 
 
 def _current_day_key_suffix():

@@ -8,7 +8,7 @@ Examines the request to determine the user's tier:
 """
 
 import os
-from api._lib import auth_utils, upstash
+from api.lib import auth_utils, upstash
 
 
 def detect_tier(handler, body: dict = None) -> dict:

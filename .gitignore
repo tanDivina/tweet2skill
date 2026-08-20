@@ -13,4 +13,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .vercel
-.env*.local
+.env
+.env.*
+gsc_key.json
+scratch/
+setup_preview.png

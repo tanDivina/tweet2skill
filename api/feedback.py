@@ -18,7 +18,7 @@ from http.server import BaseHTTPRequestHandler
 import json
 import time
 
-from api._lib import upstash, auth_utils
+from api.lib import upstash, auth_utils
 
 
 def json_response(handler, status_code, data):

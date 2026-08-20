@@ -608,8 +608,7 @@ body::after {
 .user-step-number {
   position: absolute;
   top: -18px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 28px;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -627,7 +626,7 @@ body::after {
 
 .user-step-card:hover .user-step-number {
   box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
-  transform: translateX(-50%) scale(1.05);
+  transform: scale(1.08);
 }
 
 .user-step-icon {

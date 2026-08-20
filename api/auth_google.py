@@ -20,7 +20,7 @@ import json
 import os
 import sys
 
-from api._lib import auth_utils, upstash
+from api.lib import auth_utils, upstash
 
 
 def json_response(handler, status_code, data):

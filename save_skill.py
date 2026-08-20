@@ -67,6 +67,17 @@ def call_gemini_api(api_key, content, source_url, agent_system="antigravity"):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     
     system_prompt = get_system_prompt(agent_system)
+    
+    if "x.com" in source_url.lower() or "twitter.com" in source_url.lower() or "[Tweet 1" in content or "Deep Captured" in content:
+        system_prompt += (
+            "\n\nTHREAD SYNTHESIS GUIDELINES:\n"
+            "- The source material is a multi-part Twitter/X thread or social post.\n"
+            "- Synthesize guidelines and rules from the ENTIRE thread as a unified, cohesive whole.\n"
+            "- Treat Tweet 1 (Main Post) as the primary anchor and overarching topic framework.\n"
+            "- Integrate supporting details and steps from subsequent posts into this framework without hyper-focusing, over-indexing, or fixating on any single individual post in isolation.\n"
+            "- Strictly discard conversational banter, low-signal replies, pleasantries, 'thank you' notes, bookmarks, emojis, and promotional sign-offs. Focus purely on substantive instructions, frameworks, and actionable rules."
+        )
+
     user_prompt = f"Source URL: {source_url}\n\nRaw Content:\n{content}"
 
     payload = {

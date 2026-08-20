@@ -1121,6 +1121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Content extraction function injected into the active tab
+  // Content extraction function injected into the active tab
   async function extractPageContent(deepCapture) {
     const selection = window.getSelection().toString().trim();
     if (selection) {
@@ -1131,6 +1132,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isTwitter = url.includes('x.com') || url.includes('twitter.com');
 
     if (isTwitter) {
+      // 1. Check for X Article / Longform Post first
+      const articleEl = document.querySelector('[data-testid="articleBody"]') ||
+                        document.querySelector('[data-testid="twitterArticle"]') ||
+                        (url.includes('/article/') ? document.querySelector('article') : null);
+      if (articleEl) {
+        const articleTitle = document.querySelector('h1')?.innerText || document.title;
+        const text = articleEl.innerText.trim();
+        if (text && text.length > 200) {
+          return {
+            type: 'article',
+            title: `X Article: ${articleTitle}`,
+            content: text
+          };
+        }
+      }
+
       const urlParts = url.split('/');
       const statusIndex = urlParts.indexOf('status');
       let authorHandle = '';
@@ -1138,71 +1155,130 @@ document.addEventListener('DOMContentLoaded', async () => {
         authorHandle = urlParts[statusIndex - 1].toLowerCase();
       }
 
-      const getThreadContent = () => {
+      // Low-signal filter helper for thread continuations and comment noise
+      const isLowSignalReply = (text) => {
+        if (!text) return true;
+        const stripped = text.replace(/@\w+/g, '').replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').toLowerCase().trim();
+        if (!stripped) return true;
+        
+        const lowSignalPhrases = [
+          'thanks', 'thank you', 'thx', 'appreciate it', 'glad to help', 'glad you liked it',
+          'youre welcome', 'anytime', 'bookmarked', 'bookmark', 'agree', 'agreed',
+          'totally', '100', 'facts', 'true', 'dm', 'check dm', 'check dms', 'sent',
+          'done', 'cool', 'awesome', 'nice', 'great', 'wow', 'lets go', 'following', 'qt'
+        ];
+        
+        if (stripped.length < 35 && lowSignalPhrases.some(p => stripped === p || stripped.startsWith(p) || stripped.endsWith(p))) {
+          return true;
+        }
+        return false;
+      };
+
+      // Accumulated tweets map across scroll steps to prevent losing top posts when Twitter unmounts DOM nodes
+      const accumulatedTweets = new Map();
+
+      const collectTweets = () => {
         const tweets = Array.from(document.querySelectorAll('article[data-testid="tweet"]'));
-        const uniqueTweets = new Map();
         
         tweets.forEach((tweet) => {
           const userDiv = tweet.querySelector('[data-testid="User-Name"]');
           const textDiv = tweet.querySelector('[data-testid="tweetText"]');
           const timeEl = tweet.querySelector('time');
-          const tweetId = timeEl ? timeEl.parentElement.getAttribute('href') : Math.random().toString();
-
+          
           if (textDiv) {
             const text = textDiv.innerText.trim();
+            if (!text) return;
+
+            // Generate a stable key for the tweet
+            let tweetKey = '';
+            if (timeEl && timeEl.parentElement && timeEl.parentElement.getAttribute('href')) {
+              tweetKey = timeEl.parentElement.getAttribute('href');
+            } else {
+              tweetKey = text.slice(0, 100).replace(/\s+/g, ' ');
+            }
+
             if (userDiv) {
               const handleMatch = userDiv.innerText.match(/@(\w+)/);
               const handle = handleMatch ? handleMatch[1].toLowerCase() : '';
-              if (handle === authorHandle || !authorHandle) {
-                uniqueTweets.set(tweetId, text);
+              
+              // Only collect tweets by the original author
+              if (!authorHandle || handle === authorHandle) {
+                // If it's a continuation tweet (not the root tweet), reject low-signal pleasantries
+                if (accumulatedTweets.size > 0 && isLowSignalReply(text)) {
+                  return;
+                }
+                if (!accumulatedTweets.has(tweetKey)) {
+                  accumulatedTweets.set(tweetKey, text);
+                }
               }
             } else if (!authorHandle) {
-              uniqueTweets.set(tweetId, text);
+              if (!accumulatedTweets.has(tweetKey)) {
+                accumulatedTweets.set(tweetKey, text);
+              }
             }
           }
         });
-        return Array.from(uniqueTweets.values());
+        return Array.from(accumulatedTweets.values());
       };
 
       if (deepCapture) {
-        // PRO FEATURE: Auto-scroll to capture more of the thread
+        // PRO FEATURE: Auto-scroll to capture the complete thread without losing top posts
         let previousCount = 0;
-        let currentThread = [];
         let scrollAttempts = 0;
-        const maxScrolls = 8; // Safety limit
+        let consecutiveNoNewTweets = 0;
+        const maxScrolls = 10;
 
         while (scrollAttempts < maxScrolls) {
-          currentThread = getThreadContent();
-          if (currentThread.length === previousCount && scrollAttempts > 2) break;
+          const currentList = collectTweets();
           
-          previousCount = currentThread.length;
+          if (currentList.length === previousCount) {
+            consecutiveNoNewTweets++;
+            // If after 2 scrolls no new author tweets are found, stop scrolling early
+            if (consecutiveNoNewTweets >= 2) break;
+          } else {
+            consecutiveNoNewTweets = 0;
+          }
+          
+          previousCount = currentList.length;
           window.scrollBy(0, 800);
           if (document.documentElement) document.documentElement.scrollTop += 800;
           if (document.body) document.body.scrollTop += 800;
           
-          await new Promise(r => setTimeout(r, 600)); // Wait for lazy load
+          await new Promise(r => setTimeout(r, 650));
           scrollAttempts++;
         }
         
-        // Scroll back to top slightly to look natural
+        // Scroll back to top smoothly
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
 
-        if (currentThread.length > 0) {
+        const allTweets = Array.from(accumulatedTweets.values());
+        if (allTweets.length > 0) {
+          const formattedThread = allTweets.map((t, idx) => {
+            const label = idx === 0 ? `[Tweet 1 - Main Post / Core Topic]` : `[Tweet ${idx + 1}]`;
+            return `${label}\n${t}`;
+          }).join('\n\n---\n\n');
+
           return {
             type: 'tweet',
-            title: `Deep Captured Thread by @${authorHandle || 'author'}`,
-            content: currentThread.join('\n\n---\n\n')
+            title: `Deep Captured Thread by @${authorHandle || 'author'} (${allTweets.length} tweet${allTweets.length > 1 ? 's' : ''})`,
+            content: formattedThread
           };
         }
       } else {
         // Standard Capture
-        const threadText = getThreadContent();
-        if (threadText.length > 0) {
+        collectTweets();
+        const allTweets = Array.from(accumulatedTweets.values());
+        if (allTweets.length > 0) {
+          const formattedThread = allTweets.map((t, idx) => {
+            const label = idx === 0 ? `[Tweet 1 - Main Post / Core Topic]` : `[Tweet ${idx + 1}]`;
+            return `${label}\n${t}`;
+          }).join('\n\n---\n\n');
+
           return {
             type: 'tweet',
             title: `Tweet/Thread by @${authorHandle || 'author'}`,
-            content: threadText.join('\n\n---\n\n')
+            content: formattedThread
           };
         }
       }
