@@ -87,7 +87,7 @@ Tweet2Skill operates on a privacy-first, local-first architecture. We collect on
 
 Users can request full access, export, or permanent deletion of their account data:
 - **Local Data Deletion:** Clear extension storage or uninstall the extension.
-- **Cloud Account Deletion:** Email **`support@hero-apps.com`** or **`dorien.vda@gmail.com`** with the subject *"Tweet2Skill Data Deletion Request"*. All records will be permanently erased from our database within 30 days.
+- **Cloud Account Deletion:** Email **`support@hero-apps.com`** with the subject *"Tweet2Skill Data Deletion Request"*. All records will be permanently erased from our database within 30 days.
 
 ---
 
@@ -95,6 +95,5 @@ Users can request full access, export, or permanent deletion of their account da
 
 - **Developer:** Dorien Van den Abbeele (Hero-Apps)
 - **Support Email:** `support@hero-apps.com`
-- **Personal / Developer Email:** `dorien.vda@gmail.com`
 - **Website:** [https://tweet2skill.hero-apps.com](https://tweet2skill.hero-apps.com)
 - **X / Twitter:** [@dorienvibecodes](https://x.com/dorienvibecodes)
