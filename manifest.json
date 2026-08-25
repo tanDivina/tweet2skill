@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tweet2Skill",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Convert X/Twitter tweets, threads, or web pages into Antigravity skills or Claude Code rules instantly.",
   "permissions": [
     "activeTab",

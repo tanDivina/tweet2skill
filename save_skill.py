@@ -62,6 +62,49 @@ def slugify(text):
     text = re.sub(r'-+', '-', text)
     return text.strip('-')
 
+def enrich_twitter_article_if_needed(source_url, current_content):
+    """If the URL is an X status with an attached X Article, fetch and reconstruct all rich blocks."""
+    try:
+        if ("x.com" in source_url.lower() or "twitter.com" in source_url.lower()) and "/status/" in source_url:
+            match = re.search(r'(?:x\.com|twitter\.com)/([^/]+)/status/(\d+)', source_url)
+            if match:
+                user, status_id = match.group(1), match.group(2)
+                api_url = f"https://api.fxtwitter.com/{user}/status/{status_id}"
+                req = urllib.request.Request(api_url, headers={"User-Agent": "Tweet2Skill/1.0"})
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    tweet = data.get("tweet", {})
+                    art = tweet.get("article")
+                    if art and "content" in art and "blocks" in art["content"]:
+                        blocks = art["content"]["blocks"]
+                        lines = [f"# {art.get('title', 'X Article')}\n"]
+                        for b in blocks:
+                            b_type = b.get('type')
+                            text = b.get('text', '').strip()
+                            if not text:
+                                continue
+                            if b_type == 'header-one':
+                                lines.append(f"# {text}\n")
+                            elif b_type == 'header-two':
+                                lines.append(f"## {text}\n")
+                            elif b_type == 'header-three':
+                                lines.append(f"### {text}\n")
+                            elif b_type == 'blockquote':
+                                lines.append(f"> {text}\n")
+                            elif b_type == 'unordered-list-item':
+                                lines.append(f"- {text}")
+                            elif b_type == 'ordered-list-item':
+                                lines.append(f"1. {text}")
+                            else:
+                                lines.append(f"{text}\n")
+                        full_md = "\n".join(lines)
+                        if len(full_md) > len(current_content):
+                            log(f"Enriched X Article with {len(blocks)} blocks ({len(full_md)} chars)")
+                            return full_md
+    except Exception as e:
+        log(f"Article enrichment check skipped: {e}")
+    return current_content
+
 def call_gemini_api(api_key, content, source_url, agent_system="antigravity"):
     """Send text to the Gemini API directly using the user's own key (BYOK mode)."""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
@@ -393,6 +436,9 @@ def process_request(msg):
 
     if not content:
         return {"status": "error", "message": "No content was extracted to convert."}
+
+    # Automatically expand and enrich attached X Articles if available
+    content = enrich_twitter_article_if_needed(url, content)
 
     log(f"Processing content from {url} (System: {agent_system}, Format: {agent_format}, Scope: {scope})")
     

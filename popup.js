@@ -1132,22 +1132,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isTwitter = url.includes('x.com') || url.includes('twitter.com');
 
     if (isTwitter) {
-      // 1. Check for X Article / Longform Post first
-      const articleEl = document.querySelector('[data-testid="articleBody"]') ||
-                        document.querySelector('[data-testid="twitterArticle"]') ||
-                        (url.includes('/article/') ? document.querySelector('article') : null);
-      if (articleEl) {
-        const articleTitle = document.querySelector('h1')?.innerText || document.title;
-        const text = articleEl.innerText.trim();
-        if (text && text.length > 200) {
-          return {
-            type: 'article',
-            title: `X Article: ${articleTitle}`,
-            content: text
-          };
-        }
-      }
-
       const urlParts = url.split('/');
       const statusIndex = urlParts.indexOf('status');
       let authorHandle = '';
@@ -1155,9 +1139,123 @@ document.addEventListener('DOMContentLoaded', async () => {
         authorHandle = urlParts[statusIndex - 1].toLowerCase();
       }
 
+      // 1. Check for X Article / Longform Post (/i/article/ or [data-testid="articleBody"])
+      const isArticlePage = url.includes('/article/') || document.querySelector('[data-testid="articleBody"]') || document.querySelector('[data-testid="twitterArticle"]');
+      
+      // If status post links to an X Article or we are on an article/status page, attempt direct structured block resolution
+      const statusId = statusIndex > 0 && urlParts[statusIndex + 1] ? urlParts[statusIndex + 1].split('?')[0] : '';
+      const hasArticleCard = document.querySelector('a[href*="/i/article/"]') || document.querySelector('[data-testid="card.layoutLarge.detail"]');
+      
+      if (statusId && (hasArticleCard || deepCapture || isArticlePage)) {
+        try {
+          const fxResp = await fetch(`https://api.fxtwitter.com/${authorHandle || 'i'}/status/${statusId}`, { cache: 'no-cache' });
+          if (fxResp.ok) {
+            const fxData = await fxResp.json();
+            const art = fxData?.tweet?.article;
+            if (art && art.content && Array.isArray(art.content.blocks) && art.content.blocks.length > 0) {
+              const lines = [`# ${art.title || 'X Article'}\n`];
+              for (const b of art.content.blocks) {
+                const bType = b.type;
+                const bText = (b.text || '').trim();
+                if (!bText) continue;
+                if (bType === 'header-one') lines.push(`# ${bText}\n`);
+                else if (bType === 'header-two') lines.push(`## ${bText}\n`);
+                else if (bType === 'header-three') lines.push(`### ${bText}\n`);
+                else if (bType === 'blockquote') lines.push(`> ${bText}\n`);
+                else if (bType === 'unordered-list-item') lines.push(`- ${bText}`);
+                else if (bType === 'ordered-list-item') lines.push(`1. ${bText}`);
+                else lines.push(`${bText}\n`);
+              }
+              const fullArticleMd = lines.join('\n');
+              if (fullArticleMd.length > 200) {
+                return {
+                  type: 'article',
+                  title: `X Article: ${art.title || document.title}`,
+                  content: fullArticleMd
+                };
+              }
+            }
+          }
+        } catch (e) {
+          console.log('[Tweet2Skill] API article resolution skipped, using DOM:', e);
+        }
+      }
+
+      if (isArticlePage) {
+        const articleContainer = document.querySelector('[data-testid="articleBody"]') ||
+                                  document.querySelector('[data-testid="twitterArticle"]') ||
+                                  document.querySelector('article') ||
+                                  document.querySelector('main');
+
+        if (articleContainer) {
+          const articleTitle = document.querySelector('h1')?.innerText || document.title.replace(/\s*\/ X$/, '');
+          
+          if (deepCapture) {
+            // Auto-scroll through long X Articles to force React/DraftJS to render lazy blocks
+            let scrollAttempts = 0;
+            const maxArticleScrolls = 25;
+            let lastHeight = 0;
+            let stableHeightCount = 0;
+
+            while (scrollAttempts < maxArticleScrolls) {
+              const currentHeight = document.body.scrollHeight || document.documentElement.scrollHeight;
+              if (currentHeight === lastHeight) {
+                stableHeightCount++;
+                if (stableHeightCount >= 3) break;
+              } else {
+                stableHeightCount = 0;
+              }
+              lastHeight = currentHeight;
+
+              window.scrollBy(0, 900);
+              if (document.documentElement) document.documentElement.scrollTop += 900;
+              if (document.body) document.body.scrollTop += 900;
+
+              // Check if inside a scrollable modal container
+              const scrollableModal = articleContainer.closest('[data-viewportview="true"]') || articleContainer.closest('div[style*="overflow"]');
+              if (scrollableModal && scrollableModal.scrollTop !== undefined) {
+                scrollableModal.scrollTop += 900;
+              }
+
+              await new Promise(r => setTimeout(r, 450));
+              scrollAttempts++;
+            }
+
+            // Scroll back to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (document.documentElement) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+
+          const fullText = articleContainer.innerText.trim();
+          if (fullText && fullText.length > 100) {
+            return {
+              type: 'article',
+              title: `X Article: ${articleTitle}`,
+              content: fullText
+            };
+          }
+        }
+      }
+
+      // 2. Thread and Standard Post Handling
       // Low-signal filter helper for thread continuations and comment noise
-      const isLowSignalReply = (text) => {
+      const isLowSignalReply = (text, tweetEl) => {
         if (!text) return true;
+        // Never filter out if it contains an embedded quote, card, image, code, bullet point or link
+        if (tweetEl) {
+          if (tweetEl.querySelector('[data-testid="quoteTweet"]') ||
+              tweetEl.querySelector('[data-testid="card.wrapper"]') ||
+              tweetEl.querySelector('[data-testid="tweetPhoto"]') ||
+              tweetEl.querySelector('a[href*="/status/"]') ||
+              tweetEl.querySelector('a[href*="/i/article/"]') ||
+              tweetEl.querySelector('code')) {
+            return false;
+          }
+        }
+        if (text.includes('👇') || text.includes('http') || text.includes('•') || /^\d+[\.\)]/m.test(text) || text.length > 120) {
+          return false;
+        }
+
         const stripped = text.replace(/@\w+/g, '').replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').toLowerCase().trim();
         if (!stripped) return true;
         
@@ -1165,7 +1263,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           'thanks', 'thank you', 'thx', 'appreciate it', 'glad to help', 'glad you liked it',
           'youre welcome', 'anytime', 'bookmarked', 'bookmark', 'agree', 'agreed',
           'totally', '100', 'facts', 'true', 'dm', 'check dm', 'check dms', 'sent',
-          'done', 'cool', 'awesome', 'nice', 'great', 'wow', 'lets go', 'following', 'qt'
+          'done', 'cool', 'awesome', 'nice', 'great', 'wow', 'lets go', 'following', 'qt',
+          'good luck', 'fire', 'lfg'
         ];
         
         if (stripped.length < 35 && lowSignalPhrases.some(p => stripped === p || stripped.startsWith(p) || stripped.endsWith(p))) {
@@ -1186,8 +1285,26 @@ document.addEventListener('DOMContentLoaded', async () => {
           const timeEl = tweet.querySelector('time');
           
           if (textDiv) {
-            const text = textDiv.innerText.trim();
+            let text = textDiv.innerText.trim();
             if (!text) return;
+
+            // Extract embedded quote tweets or article/link cards within this tweet
+            const quoteDiv = tweet.querySelector('[data-testid="quoteTweet"]');
+            if (quoteDiv) {
+              const quoteText = quoteDiv.innerText.trim();
+              if (quoteText) {
+                text += `\n\n  📎 [Quoted Post / Resource]:\n  ${quoteText.replace(/\n/g, '\n  ')}`;
+              }
+            } else {
+              const cardDiv = tweet.querySelector('[data-testid="card.wrapper"]') || tweet.querySelector('[data-testid="card.layoutLarge.detail"]');
+              if (cardDiv) {
+                const cardText = cardDiv.innerText.trim();
+                const cardLink = cardDiv.querySelector('a')?.href || '';
+                if (cardText) {
+                  text += `\n\n  📎 [Embedded Card / Article]:\n  ${cardText.replace(/\n/g, '\n  ')}${cardLink ? `\n  Link: ${cardLink}` : ''}`;
+                }
+              }
+            }
 
             // Generate a stable key for the tweet
             let tweetKey = '';
@@ -1201,10 +1318,10 @@ document.addEventListener('DOMContentLoaded', async () => {
               const handleMatch = userDiv.innerText.match(/@(\w+)/);
               const handle = handleMatch ? handleMatch[1].toLowerCase() : '';
               
-              // Only collect tweets by the original author
+              // Only collect tweets by the original author (or if author handle couldn't be parsed)
               if (!authorHandle || handle === authorHandle) {
                 // If it's a continuation tweet (not the root tweet), reject low-signal pleasantries
-                if (accumulatedTweets.size > 0 && isLowSignalReply(text)) {
+                if (accumulatedTweets.size > 0 && isLowSignalReply(text, tweet)) {
                   return;
                 }
                 if (!accumulatedTweets.has(tweetKey)) {
@@ -1226,25 +1343,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         let previousCount = 0;
         let scrollAttempts = 0;
         let consecutiveNoNewTweets = 0;
-        const maxScrolls = 10;
+        const maxScrolls = 30;
 
         while (scrollAttempts < maxScrolls) {
           const currentList = collectTweets();
           
           if (currentList.length === previousCount) {
             consecutiveNoNewTweets++;
-            // If after 2 scrolls no new author tweets are found, stop scrolling early
-            if (consecutiveNoNewTweets >= 2) break;
+            // Require 4 consecutive scrolls with no new tweets before breaking early
+            if (consecutiveNoNewTweets >= 4) {
+              const atBottom = (window.innerHeight + window.scrollY) >= ((document.body.scrollHeight || document.documentElement.scrollHeight) - 200);
+              if (atBottom || consecutiveNoNewTweets >= 5) break;
+            }
           } else {
             consecutiveNoNewTweets = 0;
           }
           
           previousCount = currentList.length;
-          window.scrollBy(0, 800);
-          if (document.documentElement) document.documentElement.scrollTop += 800;
-          if (document.body) document.body.scrollTop += 800;
+          window.scrollBy(0, 850);
+          if (document.documentElement) document.documentElement.scrollTop += 850;
+          if (document.body) document.body.scrollTop += 850;
           
-          await new Promise(r => setTimeout(r, 650));
+          await new Promise(r => setTimeout(r, 700));
           scrollAttempts++;
         }
         
@@ -1294,8 +1414,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let contentText = tempDiv.innerText.replace(/\s+/g, ' ').trim();
     
-    if (contentText.length > 15000) {
-      contentText = contentText.substring(0, 15000) + '\n\n... [Content Truncated due to Length]';
+    if (contentText.length > 25000) {
+      contentText = contentText.substring(0, 25000) + '\n\n... [Content Truncated due to Length]';
     }
 
     return {
